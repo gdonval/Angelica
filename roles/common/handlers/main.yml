@@ -1,0 +1,15 @@
+---
+- name: restart ssh
+  service: name=ssh state=restarted
+
+- name: restart firewall
+  service: name=ferm state=restarted
+
+- name: restart smartd
+  shell: /etc/init.d/smartd restart
+
+- name: restart fail2ban
+  service: name=fail2ban state=restarted
+
+- name: restart cron
+  service: name=cron state=restarted

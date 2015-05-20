@@ -1,0 +1,26 @@
+---
+project:
+  server:
+    application:
+      name: www.{{app.url}}
+      alias: www.{{app.url}}
+    database:
+      name: db.{{app.url}}
+      alias: db.{{app.url}}
+      path: /usr/share/adminer/adminer/
+    log_php: /var/log/php5/
+    admin: support@{{app.url}}
+  repository:
+    url: https://'{{github_account}}':'{{github_password}}'@github.com/Link4LEAD/ChekChekChek.git
+    version: draco
+
+security:
+  allow:
+    script:
+      -
+    style:
+      -
+    img:
+      -
+    font:
+      -

@@ -1,0 +1,55 @@
+# Port
+Port {{ports.ssh}}
+
+# Use only SSH 2
+Protocol 2
+
+# Server keys
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+
+# Privilege separation
+UsePrivilegeSeparation yes
+
+# Logging
+SyslogFacility AUTH
+LogLevel INFO
+
+# Disable motd
+PrintMotd no
+
+# Security restriction
+PermitRootLogin no
+RSAAuthentication no
+RhostsRSAAuthentication no
+HostbasedAuthentication no
+PermitEmptyPasswords no
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePAM no
+IgnoreRhosts yes
+StrictModes yes
+
+# Only authorized users can connect
+AllowUsers {% for user in users %}{{ user.name }} {% endfor %}{{shared.user}} {{user_deploy.name}}
+
+# Pubkey authentication only
+PubkeyAuthentication yes
+AuthorizedKeysFile %h/.ssh/authorized_keys
+
+# Connection times
+LoginGraceTime 30
+{% if env == 'prod' %}
+ClientAliveInterval 300
+ClientAliveCountMax 0
+{% else %}
+ClientAliveInterval 3000
+{% endif %}
+
+ClientAliveCountMax 0
+
+# No X11 forwarding
+X11Forwarding no
+
+# SFTP authorization
+Subsystem sftp {{ sftp.path }}

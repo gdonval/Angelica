@@ -1,0 +1,21 @@
+---
+mysql:
+  config:
+    total_ram: 1500 # Megabytes
+    total_cpu_core: 1
+    max_connections: 100
+    max_connect_errors: 100000
+    sort_buffer_size: 2M
+    table_open_cache: 300
+    query_cache_limit: 2M
+    query_cache_size: 50M
+    innodb_log_buffer_size: 2M
+    innodb_buffer_pool_instances: 1
+
+  database:
+    root_login: "{{app.short_name}}_root"
+    login: "{{app.short_name}}_account"
+    schemas_prefix: "{{app.short_name}}_"
+    schemas:
+      - prod
+      - dev

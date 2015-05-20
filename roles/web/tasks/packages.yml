@@ -1,0 +1,41 @@
+---
+- name: Packages - Add repository for PHP
+  apt_repository: repo='{{ item }}' state=present
+  with_items:
+    - deb http://packages.dotdeb.org wheezy-php56 all
+    - deb-src http://packages.dotdeb.org wheezy-php56 all
+
+- name: Packages - Add dotdeb key
+  apt_key: url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2098A6E
+  tags:
+    - creates
+
+- name: Packages - Install web packages
+  apt: name={{ item }} state=present update_cache=yes force=yes
+  with_items:
+    - git
+    - goaccess
+    - subversion
+    - apache2-mpm-prefork
+    - php5
+    - php5-intl
+    - php5-cli
+    - php5-gd
+    - php5-mysql
+    - php5-common
+    - php5-mcrypt
+    - php5-curl
+    - php5-mysql
+    - adminer
+
+- name: Packages - Install ruby
+  apt: name={{ item }} state=present update_cache=yes force=yes
+  with_items:
+    - ruby
+    - ruby-dev
+    - make
+  when: env == 'local'
+
+- name: Packages - Install compass
+  gem: name=compass state=latest
+  when: env == 'local'

@@ -1,0 +1,44 @@
+---
+- name: SSL - Copy main application private key
+  copy: src=etc/ssl/private/{{project.server.application.name}}.key dest=/etc/ssl/private/{{project.server.application.name}}.key mode=0400 owner=www-data group=www-data
+  when: env == 'prod'
+  tags:
+    - creates
+
+- name: SSL - Copy Ca BundleCopie du script qui stocke la passphrase
+  copy: src=etc/ssl/certs/{{project.server.application.name}}.cabundle dest=/etc/ssl/certs/{{project.server.application.name}}.cabundle mode=0400 owner=www-data group=www-data
+  when: env == 'prod'
+  tags:
+    - creates
+
+- name: SSL - Copy main application certificate
+  copy: src=etc/ssl/certs/{{project.server.application.name}}.crt dest=/etc/ssl/certs/{{project.server.application.name}}.crt mode=0400 owner=www-data group=www-data
+  when: env == 'prod'
+  tags:
+    - creates
+
+- name: SSL - Create autosigned private key
+  command: openssl genrsa -des3 -out /etc/ssl/private/autosigned.{{project.server.application.name}}.key -passout pass:{{ssl_passphrase}} 4096
+  args:
+    creates: /etc/ssl/private/autosigned.{{project.server.application.name}}.key
+  tags:
+    - creates
+
+- name: SSL - Protect autosigned private key
+  file: path=/etc/ssl/private/autosigned.{{project.server.application.name}}.key owner=www-data group=www-data mode=0400
+  tags:
+    - creates
+
+- name: SSL - Create autosigned certificate
+  command: openssl req -new -nodes -x509 -subj "/C=FR/ST=France/L=Nantes/O=Link4LEAD/CN=*.{{app.url}}" -days 3650 -keyout /etc/ssl/private/autosigned.{{project.server.application.name}}.key -out /etc/ssl/certs/autosigned.{{project.server.application.name}}.crt -extensions v3_ca creates=/etc/ssl/certs/autosigned.{{project.server.application.name}}.crt
+  tags:
+    - creates
+
+- name: SSL - Copy passphrase
+  template: src=etc/ssl/private/keypassphrase.sh.j2 dest=/etc/ssl/private/keypassphrase.sh owner=www-data group=www-data mode=0500
+
+- name: SSL - Reconfigure SSL configuration with the new passphrase
+  lineinfile: dest=/etc/apache2/mods-available/ssl.conf regexp="^SSLPassPhraseDialog " line="SSLPassPhraseDialog exec:/etc/ssl/private/keypassphrase.sh"
+  tags:
+    - creates
+

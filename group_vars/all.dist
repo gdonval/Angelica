@@ -1,0 +1,60 @@
+---
+ports:
+  ssh: 22222
+  mysql: 33333
+  althttp: 88888
+  smtp: 465
+
+env: prod
+
+email:
+  monitoring: monitoring@company.com
+
+fail2ban:
+  ignoreip:
+    - 127.0.0.1
+
+sftp:
+  path: /usr/lib/sftp-server
+
+app:
+  name: Project
+  short_name: prjct
+  url: project.com
+  path: "/var/www/Project"
+  timezone: Europe/Paris
+
+var_path: "/var/{{app.short_name}}"
+
+scripts:
+  log_path: "/var/log/{{app.short_name}}/scripts"
+  path: "/var/{{app.short_name}}/scripts"
+
+shared:
+  user: share
+  group: prjct
+  additionnal_groups:
+    - www-data
+  permission: 770
+  path: "{{var_path}}/share"
+
+users:
+  - name: user1
+    shell: /bin/bash
+    groups:
+      - "{{shared.group}}"
+      - www-data
+      - sudo
+  - name: user3
+    shell: /bin/bash
+    groups:
+      - "{{shared.group}}"
+      - www-data
+
+user_deploy:
+  name: user2
+  shell: /bin/bash
+  groups:
+    - "{{shared.group}}"
+    - www-data
+    - sudo

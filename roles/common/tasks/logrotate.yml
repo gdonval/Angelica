@@ -1,0 +1,3 @@
+---
+- name: Logrotate - Create logrotate configuration file for scripts logs
+  template: src=etc/logrotate.d/scripts.j2 dest=/etc/logrotate.d/scripts owner=root mode=0644

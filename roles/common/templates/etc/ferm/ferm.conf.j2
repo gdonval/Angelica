@@ -1,0 +1,108 @@
+table filter {
+	chain INPUT {
+		# Prevent all input connection by default
+		policy DROP;
+
+		# Don't break established connections
+		mod state state INVALID DROP;
+		mod state state (ESTABLISHED RELATED) ACCEPT;
+
+		# Authorized local
+		interface lo ACCEPT;
+
+		# Authorized ping - 1 per second max
+		proto icmp mod limit limit 1/second ACCEPT;
+
+		# Authorized SSH
+		proto tcp dport {{ports.ssh}} ACCEPT;
+
+		# Authorized DNS
+		proto (tcp udp) dport 53 ACCEPT;
+
+		# Server DB
+		{% if inventory_hostname in groups['dbservers'] %}
+		# Authorized SQL
+		{% for host in groups['webservers'] %}
+		proto tcp dport {{ports.mysql}} saddr {{host}} ACCEPT;
+		{% endfor %}
+		{% endif %}
+
+		# Server WEB
+		{% if inventory_hostname in groups['webservers'] %}
+		# Authorized SQL
+		{% for host in groups['dbservers'] %}
+		proto tcp dport {{ports.mysql}} saddr {{host}} ACCEPT;
+		{% endfor %}
+
+		# Authorized  HTTP & HTTPS
+		proto tcp dport (http https {{ports.althttp}}) ACCEPT;
+		{% endif %}
+
+		# Protection against SMURF attacks
+		proto icmp icmp-type address-mask-request DROP;
+		proto icmp icmp-type timestamp-request DROP;
+		proto tcp tcp-flags RST RST mod limit limit 2/second limit-burst 2 ACCEPT;
+
+		# Unauthorized spoofing packets
+		saddr 10.0.0.0/8 DROP;
+		saddr 169.254.0.0/16 DROP;
+		saddr 172.16.0.0/12 DROP;
+		saddr 127.0.0.0/8 DROP;
+		saddr 192.168.0.0/24 DROP;
+		saddr 224.0.0.0/4 DROP;
+		daddr 224.0.0.0/4 DROP;
+		saddr 240.0.0.0/5 DROP;
+		daddr 240.0.0.0/5 DROP;
+		saddr 0.0.0.0/8 DROP;
+		daddr 0.0.0.0/8 DROP;
+		daddr 239.255.255.0/24 DROP;
+		daddr 255.255.255.255 DROP;
+	}
+	chain OUTPUT {
+		policy DROP;
+
+		# Don't break established connections
+		mod state state INVALID DROP;
+		mod state state (ESTABLISHED RELATED) ACCEPT;
+
+		# Authorized local
+		outerface lo ACCEPT;
+
+		# Authorized ping
+		proto icmp ACCEPT;
+
+		# Authorized SSH
+		proto tcp dport {{ports.ssh}} ACCEPT;
+
+		# Authorized NTP
+		proto tcp dport 123 ACCEPT;
+
+		# Authorized les sorties SMTP
+		proto tcp dport {{ports.smtp}} ACCEPT;
+
+		# Authorized DNS
+		proto (tcp udp) dport 53 ACCEPT;
+
+		# Authorized HTTP & HTTPS (Let this for DB server too - GIT)
+		proto tcp dport (http https {{ports.althttp}}) ACCEPT;
+
+		# Server DB
+		{% if inventory_hostname in groups['dbservers'] %}
+		# Authorized MySQL
+		{% for host in groups['webservers'] %}
+		proto tcp dport {{ports.mysql}} daddr {{host}} ACCEPT;
+		{% endfor %}
+		{% endif %}
+
+		# Server WEB
+		{% if inventory_hostname in groups['webservers'] %}
+		# Authorized MySQL
+		{% for host in groups['dbservers'] %}
+		proto tcp dport {{ports.mysql}} daddr {{host}} ACCEPT;
+		{% endfor %}
+		{% endif %}
+	}
+	chain FORWARD {
+		policy DROP;
+	}
+}

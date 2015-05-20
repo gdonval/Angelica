@@ -1,0 +1,31 @@
+---
+- name: Configuration du ou des serveurs web
+  hosts: webservers
+  user: "{{user_deploy.name}}"
+  sudo: yes
+  port: "{{ports.ssh}}"
+  roles:
+    - web
+  vars_prompt:
+    - name: "letsgo"
+      prompt: "\n\e[1;35mYou're about to deploy web configuration to web servers. Please make sure:\n
+      - You've run the playbooks \e[0;35minit.yml\e[1;35m and \e[0;35mservers-common.yml\e[1;35m .\n
+      - You've modified \e[0;35mroles/web/vars/*.yml\e[1;35m to fit your needs.\n
+      - You've created and added the needed db scipts in \e[0;35mroles/web/files/var/scripts/*\e[1;35m.\n
+      Note: SSH server keys may have changed, so make sure your local \e[0;35m~/.ssh/known_hosts\e[1;35m is up to date.\n
+      \e[4;35mIMPORTANT\e[0;35m\e[1;35m: use \e[0;35m--skip-tags=\"creates\"\e[1;35m if you've already run this installation once.\n
+      If you're ready, then let's rock! \e[00m\n
+      (Press CTRL+C to cancel or Enter to continue)"
+    - name: "github_account"
+      prompt: "Enter the server GitHub username"
+      private: no
+    - name: "github_password"
+      prompt: "Enter the server GitHub password"
+      private: yes
+      confirm: yes
+    - name: "ssl_passphrase"
+      prompt: "Enter the SSL certificate passphrase"
+      private: yes
+      confirm: yes
+  vars_files:
+    - "roles/web/vars/{{env}}.yml"

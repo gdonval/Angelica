@@ -1,0 +1,22 @@
+---
+- name: Init - Install necessary packages
+  apt: name={{item}} state=present
+  with_items:
+    - sudo
+    - sshpass
+    - zsh
+
+- name: Init - Create user deploy
+  user: name={{item.name}} state=present groups=sudo password="{{user_deploy_password}}" update_password=on_create
+  with_items:
+    - "{{user_deploy}}"
+
+- name: Init - Set SSH keys for user deploy
+  authorized_key: user={{item.name}} key="{{ lookup('file', '../../../files/sshkeys/'+ item.name +'.pub') }}"
+  with_items:
+    - "{{user_deploy}}"
+
+- name: Init - Change SSH default port
+  template: src=etc/ssh/sshd_config.j2 dest=/etc/ssh/sshd_config owner=root mode=0644 backup=yes validate='/usr/sbin/sshd -T -f %s'
+  notify:
+    - restart ssh

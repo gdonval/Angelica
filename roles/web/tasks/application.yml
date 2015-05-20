@@ -1,0 +1,13 @@
+---
+- name: Application - Get from GIT
+  shell: git clone --origin origin --recursive --branch {{project.repository.version}} {{project.repository.url}} {{app.path}}
+  args:
+    creates: "{{app.path}}"
+  tags:
+    - creates
+    - installapp
+
+- name: Application - Update permissions of the application
+  file: path={{app.path}} owner=www-data group={{shared.group}} recurse=yes
+  tags:
+    - installapp

@@ -1,0 +1,5 @@
+---
+- name: Firewall - Copy configuration template (ferm)
+  template: src=etc/ferm/ferm.conf.j2 dest=/etc/ferm/ferm.conf mode=0644
+  notify:
+    - restart firewall

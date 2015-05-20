@@ -1,0 +1,84 @@
+#
+# Fail2Ban configuration file.
+#
+
+[DEFAULT]
+# Ban time : 1 day
+bantime  = 86400
+# 20 minutes detection period
+findtime = 1200
+# Max retry : 8
+maxretry = 8
+ignoreip = {% for ip in fail2ban.ignoreip %}{{ ip }} {% endfor %}
+backend  = auto
+
+
+# Email to send alerts
+destemail = {{ email.monitoring }}
+sendername = Fail2Ban
+
+#
+# ACTIONS
+#
+
+banaction = iptables-multiport
+mta = sendmail
+protocol = tcp
+chain = INPUT
+
+action_ = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+action_mw = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+              %(mta)s-whois[name=%(__name__)s, dest="%(destemail)s", protocol="%(protocol)s", chain="%(chain)s", sendername="%(sendername)s"]
+action_mwl = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+               %(mta)s-whois-lines[name=%(__name__)s, dest="%(destemail)s", logpath=%(logpath)s, chain="%(chain)s", sendername="%(sendername)s"]
+
+action = %(action_mw)s # default action = %(action_)s
+
+#
+# JAILS
+#
+
+[ssh]
+enabled  = true
+port     = ssh,{{ports.ssh}}
+filter   = sshd
+logpath  = /var/log/auth.log
+maxretry = 3
+
+[ssh-ddos]
+enabled  = true
+port     = ssh,{{ports.ssh}}
+filter   = sshd-ddos
+logpath  = /var/log/auth.log
+maxretry = 6
+
+[xinetd-fail]
+enabled   = true
+filter    = xinetd-fail
+port      = all
+banaction = iptables-multiport-log
+logpath   = /var/log/daemon.log
+maxretry  = 2
+
+{% if inventory_hostname in groups['webservers'] %}
+[apache]
+enabled  = true
+port     = http,https
+filter   = apache-auth
+logpath  = /var/log/apache*/*.error.log
+maxretry = 6
+
+[apache-overflows]
+enabled  = true
+port     = http,https
+filter   = apache-overflows
+logpath  = /var/log/apache*/*.error.log
+maxretry = 2
+
+[apache-multiport]
+enabled   = true
+port      = http,https
+filter    = apache-auth
+logpath   = /var/log/apache*/*error.log
+maxretry  = 6
+{% endif %}

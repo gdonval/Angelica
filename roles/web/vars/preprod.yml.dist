@@ -1,0 +1,26 @@
+---
+project:
+  server:
+    application:
+      name: preprod.{{app.url}}
+      alias: preprod.{{app.url}}
+    database:
+      name: preprod.db.{{app.url}}
+      alias: preprod.db.{{app.url}}
+      path: /usr/share/adminer/adminer/
+    log_php: /var/log/php5/
+    admin: support@{{app.url}}
+  repository:
+    url: https://'{{github_account}}':'{{github_password}}'@github.com/Company/project.git
+    version: master
+
+security:
+  allow:
+    script:
+      -
+    style:
+      -
+    img:
+      -
+    font:
+      -

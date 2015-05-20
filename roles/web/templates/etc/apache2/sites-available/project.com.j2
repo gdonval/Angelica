@@ -1,0 +1,105 @@
+# Listen for virtual host requests on all IP addresses - it activates SNI
+NameVirtualHost *:443
+NameVirtualHost *:80
+NameVirtualHost *:{{ports.althttp}}
+
+# Go ahead and accept connections for these vhosts
+# from non-SNI clients
+SSLStrictSNIVHostCheck off
+
+# Force SSL
+<VirtualHost *:80>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !on
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+
+# Default action 404
+<VirtualHost *:443>
+  SSLEngine On
+  {% if env == 'prod' %}
+  SSLCertificateFile /etc/ssl/certs/{{project.server.application.name}}.crt
+  SSLCertificateKeyFile /etc/ssl/private/{{project.server.application.name}}.key
+  SSLCertificateChainFile /etc/ssl/certs/{{project.server.application.name}}.cabundle
+  {% else %}
+  SSLCertificateFile /etc/ssl/certs/autosigned.{{project.server.application.name}}.crt
+  SSLCertificateKeyFile /etc/ssl/private/autosigned.{{project.server.application.name}}.key
+  {% endif %}
+  ServerName default
+  Redirect 404 /
+</VirtualHost>
+
+# {{project.server.application.name}} vhost
+<VirtualHost *:443>
+    SSLEngine On
+    {% if env == 'prod' %}
+    SSLCertificateFile /etc/ssl/certs/{{project.server.application.name}}.crt
+    SSLCertificateKeyFile /etc/ssl/private/{{project.server.application.name}}.key
+    SSLCertificateChainFile /etc/ssl/certs/{{project.server.application.name}}.cabundle
+    {% else %}
+    SSLCertificateFile /etc/ssl/certs/autosigned.{{project.server.application.name}}.crt
+    SSLCertificateKeyFile /etc/ssl/private/autosigned.{{project.server.application.name}}.key
+    {% endif %}
+    SSLOptions +StrictRequire
+    SSLProtocol all -SSLv2 -SSLv3
+    SSLCipherSuite ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+    SSLHonorCipherOrder on
+    SSLCompression off
+    SSLVerifyClient none
+    SSLProxyEngine off
+    Header add Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    Header set Content-Security-Policy "default-src 'self' 'unsafe-inline'; img-src data: 'self' 'unsafe-inline' {{security.allow.img | join(" ")}}; script-src 'self' 'unsafe-inline' 'unsafe-eval' {{security.allow.script | join(" ")}}; font-src 'self' 'unsafe-inline' {{security.allow.font | join(" ")}}; style-src 'self' 'unsafe-inline' {{security.allow.style | join(" ")}};"
+
+    AddType application/x-x509-ca-cert      .crt
+    AddType application/x-pkcs7-crl         .crl
+
+    SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+
+    ServerAdmin {{ project.server.admin }}
+    DocumentRoot "{{ app.path }}/web"
+
+    ServerName {{ project.server.application.name }}
+    ServerAlias {{ project.server.application.alias }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ project.server.application.name }}.error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ project.server.application.name }}.access.log common
+
+    <Directory "{{ app.path }}/web">
+        Options -Indexes +FollowSymLinks +Includes
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+    </Directory>
+</VirtualHost>
+
+# {{project.server.database.name}} vhost - adminer
+<VirtualHost *:{{ports.althttp}}>
+    {% if env == 'prod' %}
+    SSLEngine On
+    SSLCertificateFile /etc/ssl/certs/autosigned.{{project.server.application.name}}.crt
+    SSLCertificateKeyFile /etc/ssl/private/autosigned.{{project.server.application.name}}.key
+    SSLOptions +StrictRequire
+    SSLProtocol all -SSLv2 -SSLv3
+    SSLCipherSuite AES128+EECDH:AES128+EDH
+    SSLHonorCipherOrder on
+    SSLCompression off
+    Header add Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    {% endif %}
+
+    ServerAdmin {{ project.server.admin }}
+    DocumentRoot "{{ project.server.database.path }}"
+
+    ServerName {{ project.server.database.name }}
+    ServerAlias {{ project.server.database.alias }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ project.server.database.name }}.error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ project.server.database.name }}.access.log common
+
+    <Directory "{{ project.server.database.path }}">
+        Options -Indexes +FollowSymLinks +Includes
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+    </Directory>
+</VirtualHost>

@@ -1,0 +1,18 @@
+---
+# Install web packages
+- include: packages.yml tags=packages
+
+# Configure apache server
+- include: apache.yml tags=apache
+
+# Instell internal scripts
+- include: scripts.yml tags=scripts
+
+# Install application
+- include: application.yml tags=application
+
+# Configure SSL
+- include: ssl.yml tags=ssl
+
+# Configure Adminer
+- include: adminer.yml tags=adminer

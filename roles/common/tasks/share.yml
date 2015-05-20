@@ -1,0 +1,5 @@
+---
+- name: Share - Create sharing directory
+  shell: mkdir -p {{shared.path}} && chmod -R 775 {{shared.path}} && chgrp -R {{shared.group}} {{shared.path}}
+  tags:
+    - creates

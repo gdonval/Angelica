@@ -1,0 +1,3 @@
+---
+- name: Adminer - Modify the admin style
+  command: cp /usr/share/adminer/designs/brade/adminer.css /usr/share/adminer/adminer/

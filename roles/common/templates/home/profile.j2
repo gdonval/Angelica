@@ -1,0 +1,30 @@
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+	. "$HOME/.bashrc"
+    fi
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# Display MotD
+dynmotd
+
+# Set default editor to vim
+EDITOR=vim
+VISUAL=$EDITOR
+export EDITOR VISUAL
+
+# Alias
+alias ls='ls --color=auto'
+alias ll='ls --color=auto -laht'
+alias grep='grep --color=auto'
+
+# Shell coloration
+# PS1='\e[33;1m\u@\h: \e[31m\W\e[0m\$ '
+
+cd /var/

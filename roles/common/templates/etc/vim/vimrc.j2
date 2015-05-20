@@ -1,0 +1,22 @@
+set nocompatible
+
+" Set color
+filetype plugin on
+syntax on
+set background=dark
+
+" Tab configuration
+set expandtab
+set smartindent
+set autoindent
+set backspace=indent,eol,start
+
+" Set indentation
+set ts=2 sts=2 sw=2 expandtab
+
+if has("autocmd")
+    filetype on
+
+    autocmd FileType make setlocal ts=8 sts=8 sw=8 noexpandtab
+    autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+endif

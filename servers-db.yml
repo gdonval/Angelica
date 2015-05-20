@@ -1,0 +1,29 @@
+---
+- name: Database server(s) configuration
+  hosts: dbservers
+  user: "{{user_deploy.name}}"
+  sudo: yes
+  port: "{{ports.ssh}}"
+  roles:
+    - db
+  vars_prompt:
+    - name: "letsgo"
+      prompt: "\n\e[1;35mYou're about to deploy database configuration to dbms servers. Please make sure:\n
+      - You've run the playbooks \e[0;35minit.yml\e[1;35m and \e[0;35mservers-common.yml\e[1;35m .\n
+      - You've modified \e[0;35mroles/db/vars/*.yml\e[1;35m to fit your needs.\n
+      - You've added your database dump in \e[0;35mroles/db/files/*project_name*_*env*.sql\e[1;35m.\n
+      - You've created and added the needed db scipts in \e[0;35mroles/db/files/var/scripts/*\e[1;35m.\n
+      Note: SSH server keys may have changed, so make sure your local \e[0;35m~/.ssh/known_hosts\e[1;35m is up to date.\n
+      \e[4;35mIMPORTANT\e[0;35m\e[1;35m: use \e[0;35m--skip-tags=\"creates\"\e[1;35m if you've already run this installation once.\n
+      If you're ready, then let's rock! \e[00m\n
+      (Press CTRL+C to cancel or Enter to continue)"
+    - name: "root_password"
+      prompt: "Enter new database root password"
+      private: yes
+      confirm: yes
+    - name: "database_password"
+      prompt: "Enter the new database application account password"
+      private: yes
+      confirm: yes
+  vars_files:
+    - "roles/db/vars/{{env}}.yml"

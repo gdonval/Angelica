@@ -1,0 +1,10 @@
+---
+# Install DBMS
+- include: mysql.yml tags=mysql
+
+# Install script
+- include: scripts.yml tags=scripts
+
+# Install crons
+- include: cron.yml tags=cron
+  when: env == 'prod'

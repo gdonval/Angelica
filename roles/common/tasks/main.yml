@@ -1,0 +1,33 @@
+---
+# Install common packages
+- include: packages.yml tags=packages
+
+# Manager users
+- include: users.yml tags=user
+
+# Configure SSH
+- include: ssh.yml tags=ssh
+
+## Configure hardware monitoring
+- include: monitoring.yml tags=monitoring
+  when: env != 'local'
+
+# Install custom scripts
+- include: scripts.yml tags=scripts
+
+# Configure log rotation
+- include: logrotate.yml tags=logrotate
+
+# Configure cron jobs
+- include: cron.yml tags=cron
+  when: env != 'local'
+
+# Configure firewall
+- include: firewall.yml tags=firewall
+
+# Prevent cracking with fail2ban
+- include: fail2ban.yml tags=fail2ban
+  when: env != 'local'
+
+# Configure sharing & backup
+- include: share.yml tags=share

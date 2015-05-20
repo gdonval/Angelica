@@ -1,0 +1,10 @@
+---
+- name: Fail2ban - Save default configuration file
+  command: cp -n /etc/fail2ban/jail.conf /etc/fail2ban/jail.conf.bak
+  tags:
+    - creates
+
+- name: Fail2ban - Replace by the specific configuation file
+  template: src=etc/fail2ban/jail.conf.j2 dest=/etc/fail2ban/jail.conf owner=root mode=0644 backup=yes
+  notify:
+    - restart fail2ban
