@@ -8,6 +8,4 @@
     - installapp
 
 - name: Application - Update permissions of the application
-  file: path={{app.path}} owner=www-data group={{shared.group}} recurse=yes
-  tags:
-    - installapp
+  file: path={{app.path}} owner=www-data group={{shared.group}} recurse=yes state=directory
