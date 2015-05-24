@@ -17,8 +17,17 @@
   tags:
     - creates
 
-- name: SSL - Create autosigned private key
-  command: openssl genrsa -des3 -out /etc/ssl/private/autosigned.{{project.server.application.name}}.key -passout pass:{{ssl_passphrase}} 4096
+- name: SSL - Create autosigned private key with a passphrase
+  command: openssl genrsa -aes128 -out /etc/ssl/private/autosigned.{{project.server.application.name}}.key -passout pass:{{ssl_passphrase}} 4096
+  when: ssl_passphrase != ""
+  args:
+    creates: /etc/ssl/private/autosigned.{{project.server.application.name}}.key
+  tags:
+    - creates
+
+- name: SSL - Create autosigned private key without a passphrase
+  command: openssl genrsa -out /etc/ssl/private/autosigned.{{project.server.application.name}}.key 4096
+  when: ssl_passphrase == ""
   args:
     creates: /etc/ssl/private/autosigned.{{project.server.application.name}}.key
   tags:
@@ -36,9 +45,11 @@
 
 - name: SSL - Copy passphrase
   template: src=etc/ssl/private/keypassphrase.sh.j2 dest=/etc/ssl/private/keypassphrase.sh owner=www-data group=www-data mode=0500
+  when: ssl_passphrase != ""
 
 - name: SSL - Reconfigure SSL configuration with the new passphrase
   lineinfile: dest=/etc/apache2/mods-available/ssl.conf regexp="^SSLPassPhraseDialog " line="SSLPassPhraseDialog exec:/etc/ssl/private/keypassphrase.sh"
+  when: ssl_passphrase != ""
   tags:
     - creates
 
