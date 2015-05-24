@@ -12,7 +12,7 @@
 - name: MySQL - Install MariaDB
   apt: name={{ item }} state=present update_cache=true
   with_items:
-    - mariadb-client-5.5
+    - mariadb-client
     - mariadb-server
     - python-mysqldb
   tags:
