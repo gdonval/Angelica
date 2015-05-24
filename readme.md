@@ -44,6 +44,7 @@ Note: If you’re not on Ubuntu, it's possible to get a 404 when running third c
 
         $ sudo aptitude install python ssh
 
+- Verify that root connections are enabled - dont’t worry, it will be disabled by ansible (the application servers):
 
 ### Installation (ansible machine) ###
 
@@ -62,15 +63,15 @@ Note: If you’re not on Ubuntu, it's possible to get a 404 when running third c
         $ cd /path/ansible/
         $ ansible-playbook -i inventory/servers init.yml --ask-pass
 
-- Deploy for all servers:
+- Deploy common configuration for all servers:
 
         $ ansible-playbook -i inventory/servers servers-common.yml --ask-sudo-pass
 
-- Deploy for web servers (if you’re in local, read the next section before executing the command - you might need `--skip-tags "installapp"`):
+- Deploy web servers configuration (if you’re in local, read the next section before executing the command - you might need `--skip-tags "installapp"`):
 
         $ ansible-playbook -i inventory/servers servers-web.yml --ask-sudo-pass
 
-- Deploy for dbms servers:
+- Deploy dbms servers configuration:
 
         $ ansible-playbook -i inventory/servers servers-db.yml --ask-sudo-pass
 
@@ -78,7 +79,7 @@ Note: If you’re not on Ubuntu, it's possible to get a 404 when running third c
 
 - In a local environment, you’ll need to share your project between you guest and your host, to edit the code with your IDE. Three options are possible:
 
-#### Sharing with VirtualBox - can harm performance really badly####
+##### Sharing with VirtualBox - can harm performance really badly #####
 
 - First, don’t forget to add `--skip-tags "installapp"` when your run the web playbook;
 
@@ -88,11 +89,11 @@ Note: If you’re not on Ubuntu, it's possible to get a 404 when running third c
 
 - Shut down the guest VM and create a shared folder named after your project.
 
-#### SFTP - not convenient and pretty slow ####
+##### SFTP - not convenient and pretty slow #####
 
 - Just configure your IDE to reach your VM code with SFTP.
 
-#### SSHFS - the most reliable option ####
+##### SSHFS - the most reliable option #####
 
 - First, don’t forget to add `--skip-tags "installapp"` when your run the web playbook;
 

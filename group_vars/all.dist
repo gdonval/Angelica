@@ -7,6 +7,12 @@ ports:
 
 env: prod
 
+company:
+    name: Company
+    city: Paris
+    country: France
+    country_code: FR
+
 email:
   monitoring: monitoring@company.com
 

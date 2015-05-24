@@ -11,9 +11,10 @@ project:
     log_php: /var/log/php5/
     admin: support@{{app.url}}
   repository:
-    url: https://'{{github_account}}':'{{github_password}}'@github.com/Company/project.git
-    version: master
+    url: https://'{{github_account}}':'{{github_password}}'@github.com/Company/Project.git
+    version: branch
 
+# Here you can set the content security policy of your preprod server
 security:
   allow:
     script:

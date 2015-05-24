@@ -30,7 +30,7 @@
     - creates
 
 - name: SSL - Create autosigned certificate
-  command: openssl req -new -nodes -x509 -subj "/C=FR/ST=France/L=Nantes/O=Link4LEAD/CN=*.{{app.url}}" -days 3650 -keyout /etc/ssl/private/autosigned.{{project.server.application.name}}.key -out /etc/ssl/certs/autosigned.{{project.server.application.name}}.crt -extensions v3_ca creates=/etc/ssl/certs/autosigned.{{project.server.application.name}}.crt
+  command: openssl req -new -nodes -x509 -subj "/C={{company.country_code}}/ST={{company.country}}/L={{company.city}}/O={{company.name}}/CN=*.{{app.url}}" -days 3650 -keyout /etc/ssl/private/autosigned.{{project.server.application.name}}.key -out /etc/ssl/certs/autosigned.{{project.server.application.name}}.crt -extensions v3_ca creates=/etc/ssl/certs/autosigned.{{project.server.application.name}}.crt
   tags:
     - creates
 
