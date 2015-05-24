@@ -2,7 +2,7 @@
 ports:
   ssh: 22222
   mysql: 33333
-  althttp: 88888
+  althttp: 8888
   smtp: 465
 
 env: prod
