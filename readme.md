@@ -133,3 +133,5 @@ To update the server, please always use ansible. This permits to control the val
         $ ansible-playbook -i inventory/servers servers-common.yml --ask-sudo-pass --skip-tags "creates" --tags "users"
 
 Remember, test the script in local before running it in production!
+
+![angelica](ange.png)
