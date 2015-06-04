@@ -25,7 +25,6 @@
     - php5-common
     - php5-mcrypt
     - php5-curl
-    - php5-mysql
     - adminer
 
 - name: Packages - Install ruby
