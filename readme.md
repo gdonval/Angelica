@@ -1,7 +1,7 @@
 # Angelica Project #
 ---
 
-___________________________________![angelica](ange.png)___________________________________![
+___________________________________![angelica](ange.png)___________________________________
 
 ## Semi-automatic web servers installation with ansible ##
 
