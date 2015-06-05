@@ -41,13 +41,13 @@ Note: If you’re not on Ubuntu, it's possible to get a 404 when running third c
         $ cd && mkdir ansible
         $ git clone git@github.com:gui-don/angelica.git ansible
 
-- Install a linux on the application server(s). Choose a root password (strong please, 16 chars). It must be the same for all servers (the application servers).
+- Install a linux on the application server(s). Choose a root password (strong please, at least 16 chars). It must be the same for all servers (the application servers).
 
 - Verify that `python` and `ssh` are installed (the application servers):
 
         $ sudo aptitude install python ssh
 
-- Verify that root connections are enabled - dont’t worry, it will be disabled by ansible (the application servers):
+- Verify that root connections are enabled - don’t worry, it will be disabled by ansible (the application servers):
 
 ### Installation (ansible machine) ###
 
