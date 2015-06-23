@@ -3,8 +3,11 @@ if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
 
-# Display MotD
-dynmotd
+# Display MotD - only on tty
+if [ "$SSH_TTY" ]
+then
+    dynmotd
+fi
 
 # Set default editor to vim
 EDITOR=vim

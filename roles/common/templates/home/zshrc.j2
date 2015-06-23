@@ -19,8 +19,11 @@ export EDITOR="vim"
 VISUAL=$EDITOR
 export EDITOR VISUAL
 
-# Display MotD
-dynmotd
+# Display MotD - only on tty
+if [ "$SSH_TTY" ]
+then
+    dynmotd
+fi
 
 # Shell
 autoload -U colors && colors
