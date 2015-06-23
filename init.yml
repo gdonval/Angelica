@@ -2,6 +2,7 @@
 - name: Initialisation. Create the main user for deployment
   hosts: all
   user: root
+  port: "{{ssh_port}}"
   roles:
     - init
   vars_prompt:

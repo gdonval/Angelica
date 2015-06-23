@@ -61,10 +61,10 @@ Note: If you’re not on Ubuntu, it's possible to get a 404 when running third c
 
 - Before the installation, connect once to the application servers with SSH, to initialize your `know_hosts` file.
 
-- Run the initialisation script:
+- Run the initialisation script, with the right SSH port:
 
         $ cd /path/ansible/
-        $ ansible-playbook -i inventory/servers init.yml --ask-pass
+        $ ansible-playbook -i inventory/servers init.yml --ask-pass --extra-vars "ssh_port=port"
 
 - Deploy common configuration for all servers:
 
