@@ -57,14 +57,14 @@
   template: src=etc/vim/vimrc.j2 dest=/etc/vim/vimrc mode=644
 
 - name: Users - Install user profile configuration for bash
-  template: src=home/bashrc.j2 dest="/home/{{item.name}}/.bashrc" mode=644 owner="{{item.name}}"
+  template: src=home/bashrc.j2 dest="/home/{{item.name}}/.bashrc" mode=644 owner="{{item.name}}" group="{{item.name}}"
   when: item.name is defined
   with_flattened:
     - users | default({})
     - "{{[user_deploy]}}"
 
 - name: Users - Install user profile configuration for zsh
-  template: src=home/zshrc.j2 dest="/home/{{item.name}}/.zshrc" mode=644 owner="{{item.name}}"
+  template: src=home/zshrc.j2 dest="/home/{{item.name}}/.zshrc" mode=644 owner="{{item.name}}" group="{{item.name}}"
   when: item.name is defined
   with_flattened:
     - users | default({})
