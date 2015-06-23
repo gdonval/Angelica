@@ -57,7 +57,7 @@ SSLStrictSNIVHostCheck off
     SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
 
     ServerAdmin {{ project.server.admin }}
-    DocumentRoot "{{ app.path }}{{ app.webpath }}"
+    DocumentRoot "{{ app.webpath }}{{ app.webdir }}"
 
     ServerName {{ project.server.application.name }}
     ServerAlias {{ project.server.application.alias }}
@@ -65,7 +65,7 @@ SSLStrictSNIVHostCheck off
     ErrorLog ${APACHE_LOG_DIR}/{{ project.server.application.name }}.error.log
     CustomLog ${APACHE_LOG_DIR}/{{ project.server.application.name }}.access.log common
 
-    <Directory "{{ app.path }}{{ app.webpath }}">
+    <Directory "{{ app.webpath }}{{ app.webdir }}">
         Options -Indexes +FollowSymLinks +Includes
         AllowOverride All
         Order allow,deny

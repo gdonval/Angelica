@@ -1,11 +1,11 @@
 ---
 - name: Cron - Backup database every day, 6AM
-  cron: name="save database" hour="6" minute="0" job="{{scripts.path}}/saveDatabase.sh" user="{{shared.user}}"
+  cron: name="save database" hour="6" minute="0" job="{{app.scripts.path}}/saveDatabase.sh" user="{{shared.user}}"
   notify:
     - restart cron
 
 - name: Cron - Sync backups, every day, 6:30AM
-  cron: name="synchronize backup" hour="6" minute="30" job="{{scripts.path}}/synchronizeBackupDb.sh" user="{{shared.user}}"
+  cron: name="synchronize backup" hour="6" minute="30" job="{{app.scripts.path}}/synchronizeBackupDb.sh" user="{{shared.user}}"
   notify:
     - restart cron
   when: env == 'prod'

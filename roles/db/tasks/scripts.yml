@@ -1,14 +1,14 @@
 ---
 - name: Scripts - Create constants file
-  template: src=var/scripts/dbConstants.sh.j2 dest={{scripts.path + '/dbConstants.sh'}} mode=770
+  template: src=var/scripts/dbConstants.sh.j2 dest={{app.scripts.path + '/dbConstants.sh'}} mode=770
 
 - name: Scripts - Copy scripts
   copy: >
     src={{item}}
-    dest={{scripts.path}}
+    dest={{app.scripts.path}}
     mode=770
   with_fileglob:
     - "var/scripts/*"
 
 - name: Script - Change group
-  file: path={{scripts.path}} group={{shared.group}} recurse=yes
+  file: path={{app.scripts.path}} group={{shared.group}} recurse=yes

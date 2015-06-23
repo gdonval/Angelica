@@ -8,6 +8,6 @@
 BACKUPS_DESTINATIONS_WEB=({% for host in groups['dbservers'] %}{{host}} {% endfor %})
 
 # Application
-APP_PATH={{app.path}}
+APP_PATH={{app.webpath}}
 # GIT data
 GIT_REPOSITORY={{project.repository.version}}

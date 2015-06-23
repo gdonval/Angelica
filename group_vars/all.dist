@@ -1,49 +1,84 @@
 ---
+
+# The application ports, everything else will be closed
+# SSH, MySQL are mandatory - install will fail without them
+# Other port if specified, will install the corresponding service
 ports:
   ssh: 22222
   mysql: 33333
   althttp: 8888
   smtp: 465
 
+
+# The application environment
+# It will load the corresponding configuration
+# It is a mandatory option
+# Possible values are : prod, preprod or local
 env: prod
 
+
+# Which company created the application
+# Will be used mainly in SSL certificates
+# It is a mandatory option
 company:
     name: Company
     city: Paris
     country: France
     country_code: FR
 
+
+# The administrator email
+# All emails related to the server monitoring will be send here
+# It is a mandatory option but note that without SMTP, the server WILL NOT send any emails
 email:
   monitoring: monitoring@company.com
 
-fail2ban:
-  ignoreip:
-    - 127.0.0.1
 
-sftp:
-  path: /usr/lib/sftp-server
-
+# Application information
+# It is a mandatory option
 app:
   name: Project
   short_name: prjct
   url: project.com
-  path: "/var/www/Project"
+  path: "/var/prjct"
+  webpath: "/var/www/Project"
+  webdir: "/"
   timezone: Europe/Paris
+  scripts:
+    log_path: "/var/log/{{app.short_name}}/scripts"
+    path: "{{app.path}}/scripts"
 
-var_path: "/var/{{app.short_name}}"
 
-scripts:
-  log_path: "/var/log/{{app.short_name}}/scripts"
-  path: "/var/{{app.short_name}}/scripts"
-
+# Share user option
+# The purpose of this user is to be able to replicate backups between servers
+# The purpose of the group is to create a common permission scope for every users inside the server
+# Share group is SSH allowed
+# It is a mandatory option
 shared:
   user: share
-  group: prjct
+  group: "{{app.short_name}}"
   additionnal_groups:
     - www-data
   permission: 770
-  path: "{{var_path}}/share"
+  path: "{{app.path}}/share"
 
+
+# The main user, in charge of the installation
+# Shell can be either /bin/bash or /bin/zsh
+# It is a mandatory option
+user_deploy:
+  name: user2
+  shell: /bin/bash
+  groups:
+    - "{{shared.group}}"
+    - www-data
+    - sudo
+
+
+# Users option
+# Add one or several users to your server
+# Shell can be either /bin/bash or /bin/zsh
+# It is NOT a mandatory option
 users:
   - name: user1
     shell: /bin/bash
@@ -57,10 +92,12 @@ users:
       - "{{shared.group}}"
       - www-data
 
-user_deploy:
-  name: user2
-  shell: /bin/bash
-  groups:
-    - "{{shared.group}}"
-    - www-data
-    - sudo
+
+# Fail2ban options
+# It is a mandatory option
+fail2ban:
+  ignoreip:
+    - 127.0.0.1
+
+sftp:
+  path: /usr/lib/sftp-server

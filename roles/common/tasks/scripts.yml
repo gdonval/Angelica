@@ -1,29 +1,29 @@
 ---
 - name: Cron - Create log directory
-  shell: mkdir -p {{scripts.log_path}} && chmod -R 2770 {{scripts.log_path}} && chgrp -R {{shared.group}} {{scripts.log_path}}
+  shell: mkdir -p {{app.scripts.log_path}} && chmod -R 2770 {{app.scripts.log_path}} && chgrp -R {{shared.group}} {{app.scripts.log_path}}
   tags:
     - creates
 
 - name: Scripts - Create scripts directory
-  shell: mkdir -p {{var_path}} && chmod -R 2770 {{var_path}} && chgrp -R {{shared.group}} {{var_path}}
+  shell: mkdir -p {{app.path}} && chmod -R 2770 {{app.path}} && chgrp -R {{shared.group}} {{app.path}}
   tags:
     - creates
 
 - name: Scripts - Create scripts directory
-  shell: mkdir -p {{scripts.path}} && chmod -R 2770 {{scripts.path}} && chgrp -R {{shared.group}} {{scripts.path}}
+  shell: mkdir -p {{app.scripts.path}} && chmod -R 2770 {{app.scripts.path}} && chgrp -R {{shared.group}} {{app.scripts.path}}
   tags:
     - creates
 
 - name: Scripts - Create constants file
-  template: src=var/scripts/globalConstants.sh.j2 dest={{scripts.path + '/globalConstants.sh'}} mode=770
+  template: src=var/scripts/globalConstants.sh.j2 dest={{app.scripts.path + '/globalConstants.sh'}} mode=770
 
 - name: Scripts - Copy scripts
   copy: >
     src={{item}}
-    dest={{scripts.path}}
+    dest={{app.scripts.path}}
     mode=770
   with_fileglob:
     - "var/scripts/*"
 
 - name: Script - Change group
-  file: path={{scripts.path}} group={{shared.group}} recurse=yes
+  file: path={{app.scripts.path}} group={{shared.group}} recurse=yes
