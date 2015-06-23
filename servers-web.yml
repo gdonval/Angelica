@@ -1,7 +1,7 @@
 ---
 - name: Configuration du ou des serveurs web
   hosts: webservers
-  user: "{{user_deploy.name}}"
+  remote_user: "{{user_deploy.name}}"
   sudo: yes
   port: "{{ports.ssh}}"
   roles:

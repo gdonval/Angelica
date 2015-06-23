@@ -1,7 +1,7 @@
 ---
 - name: Database server(s) configuration
   hosts: dbservers
-  user: "{{user_deploy.name}}"
+  remote_user: "{{user_deploy.name}}"
   sudo: yes
   port: "{{ports.ssh}}"
   roles:

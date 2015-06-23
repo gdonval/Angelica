@@ -1,7 +1,7 @@
 ---
 - name: Install common configuration shared by all servers
   hosts: all
-  user: "{{user_deploy.name}}"
+  remote_user: "{{user_deploy.name}}"
   sudo: yes
   port: "{{ports.ssh}}"
   roles:

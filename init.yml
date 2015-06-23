@@ -1,7 +1,7 @@
 ---
 - name: Initialisation. Create the main user for deployment
   hosts: all
-  user: root
+  remote_user: root
   port: "{{ssh_port}}"
   roles:
     - init
