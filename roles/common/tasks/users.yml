@@ -56,6 +56,13 @@
 
 - name: Users - Install user profile configuration
   template: src=home/profile.j2 dest="/home/{{item.name}}/.profile" mode=644
+- name: Users - Install user profile configuration for bash
+  template: src=home/bashrc.j2 dest="/home/{{item.name}}/.bashrc" mode=644 owner="{{item.name}}"
   with_flattened:
     - "{{[user_deploy]}}"
     - "{{users}}"
+- name: Users - Install user profile configuration for zsh
+  template: src=home/zshrc.j2 dest="/home/{{item.name}}/.zshrc" mode=644 owner="{{item.name}}"
+  with_flattened:
+    - users | default({})
+    - "{{[user_deploy]}}"
