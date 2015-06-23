@@ -31,7 +31,7 @@ IgnoreRhosts yes
 StrictModes yes
 
 # Only authorized users can connect
-AllowUsers {% for user in users %}{{ user.name }} {% endfor %}{{shared.user}} {{user_deploy.name}}
+AllowGroups {{shared.group}}
 
 # Pubkey authentication only
 PubkeyAuthentication yes
