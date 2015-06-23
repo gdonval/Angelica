@@ -15,7 +15,7 @@
 - name: Users - Create all necessary groups for every other users
   group: name={{item.1}} state=present
   with_subelements:
-    - "{{users}}"
+    - users | default({})
     - groups
 
 - name: Users - Manage shared/backup account
@@ -32,15 +32,17 @@
 
 - name: Users - Manage all other users
   user: name={{item.name}} state=present groups="{{item.groups | join(",") }}" shell={{item.shell}} password="*" update_password=on_create
+  when: item.groups is defined
   with_flattened:
+    - users | default({})
     - "{{[user_deploy]}}"
-    - "{{users}}"
 
 - name: Users - Set SSH keys for all users except share
   authorized_key: user={{item.name}} key="{{ lookup('file', '../../../files/sshkeys/'+ item.name +'.pub') }}"
+  when: "'{{shared.group}}' in item.groups and item.name is defined"
   with_flattened:
+    - users | default({})
     - "[{{user_deploy}}]"
-    - "{{users}}"
 
 - name: Users - Install sudoers configuration
   template: src=etc/sudoers.j2 dest=/etc/sudoers mode=644
@@ -54,15 +56,17 @@
 - name: Users - Install vim configuration
   template: src=etc/vim/vimrc.j2 dest=/etc/vim/vimrc mode=644
 
-- name: Users - Install user profile configuration
-  template: src=home/profile.j2 dest="/home/{{item.name}}/.profile" mode=644
 - name: Users - Install user profile configuration for bash
   template: src=home/bashrc.j2 dest="/home/{{item.name}}/.bashrc" mode=644 owner="{{item.name}}"
-  with_flattened:
-    - "{{[user_deploy]}}"
-    - "{{users}}"
-- name: Users - Install user profile configuration for zsh
-  template: src=home/zshrc.j2 dest="/home/{{item.name}}/.zshrc" mode=644 owner="{{item.name}}"
+  when: item.name is defined
   with_flattened:
     - users | default({})
     - "{{[user_deploy]}}"
+
+- name: Users - Install user profile configuration for zsh
+  template: src=home/zshrc.j2 dest="/home/{{item.name}}/.zshrc" mode=644 owner="{{item.name}}"
+  when: item.name is defined
+  with_flattened:
+    - users | default({})
+    - "{{[user_deploy]}}"
+
