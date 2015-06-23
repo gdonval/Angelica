@@ -33,6 +33,7 @@
     - ruby
     - ruby-dev
     - make
+    - gcc
   when: env == 'local'
 
 - name: Packages - Install compass
