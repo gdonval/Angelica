@@ -86,7 +86,7 @@
 #
 # The accept serialization lock file MUST BE STORED ON A LOCAL DISK.
 #
-LockFile ${APACHE_LOCK_DIR}/accept.lock
+Mutex file:${APACHE_LOCK_DIR} default
 
 #
 # PidFile: The file in which the server should record its process
@@ -111,7 +111,7 @@ KeepAlive On
 # during a persistent connection. Set to 0 to allow an unlimited amount.
 # We recommend you leave this number high, for maximum performance.
 #
-MaxKeepAliveRequests 100
+MaxKeepAliveRequests 300
 
 #
 # KeepAliveTimeout: Number of seconds to wait for the next request from the
@@ -119,101 +119,9 @@ MaxKeepAliveRequests 100
 #
 KeepAliveTimeout 5
 
-##
-## Server-Pool Size Regulation (MPM specific)
-##
-
-# prefork MPM
-# StartServers: number of server processes to start
-# MinSpareServers: minimum number of server processes which are kept spare
-# MaxSpareServers: maximum number of server processes which are kept spare
-# MaxClients: maximum number of server processes allowed to start
-# MaxRequestsPerChild: maximum number of requests a server process serves
-<IfModule mpm_prefork_module>
-    StartServers          5
-    MinSpareServers       5
-    MaxSpareServers      10
-    MaxClients          150
-    MaxRequestsPerChild   0
-</IfModule>
-
-# worker MPM
-# StartServers: initial number of server processes to start
-# MinSpareThreads: minimum number of worker threads which are kept spare
-# MaxSpareThreads: maximum number of worker threads which are kept spare
-# ThreadLimit: ThreadsPerChild can be changed to this maximum value during a
-#              graceful restart. ThreadLimit can only be changed by stopping
-#              and starting Apache.
-# ThreadsPerChild: constant number of worker threads in each server process
-# MaxClients: maximum number of simultaneous client connections
-# MaxRequestsPerChild: maximum number of requests a server process serves
-<IfModule mpm_worker_module>
-    StartServers          2
-    MinSpareThreads      25
-    MaxSpareThreads      75
-    ThreadLimit          64
-    ThreadsPerChild      25
-    MaxClients          150
-    MaxRequestsPerChild   0
-</IfModule>
-
-# event MPM
-# StartServers: initial number of server processes to start
-# MinSpareThreads: minimum number of worker threads which are kept spare
-# MaxSpareThreads: maximum number of worker threads which are kept spare
-# ThreadsPerChild: constant number of worker threads in each server process
-# MaxClients: maximum number of simultaneous client connections
-# MaxRequestsPerChild: maximum number of requests a server process serves
-<IfModule mpm_event_module>
-    StartServers          2
-    MinSpareThreads      25
-    MaxSpareThreads      75
-    ThreadLimit          64
-    ThreadsPerChild      25
-    MaxClients          150
-    MaxRequestsPerChild   0
-</IfModule>
-
 # These need to be set in /etc/apache2/envvars
 User ${APACHE_RUN_USER}
 Group ${APACHE_RUN_GROUP}
-
-#
-# AccessFileName: The name of the file to look for in each directory
-# for additional configuration directives.  See also the AllowOverride
-# directive.
-#
-
-AccessFileName .htaccess
-
-#
-# The following lines prevent .htaccess and .htpasswd files from being
-# viewed by Web clients.
-#
-<Files ~ "^\.ht">
-    Order allow,deny
-    Deny from all
-    Satisfy all
-</Files>
-
-#
-# DefaultType is the default MIME type the server will use for a document
-# if it cannot otherwise determine one, such as from filename extensions.
-# If your server contains mostly text or HTML documents, "text/plain" is
-# a good value.  If most of your content is binary, such as applications
-# or images, you may want to use "application/octet-stream" instead to
-# keep browsers from trying to display binary files as though they are
-# text.
-#
-# It is also possible to omit any default MIME type and let the
-# client's browser guess an appropriate action instead. Typically the
-# browser will decide based on the file's extension then. In cases
-# where no good assumption can be made, letting the default MIME type
-# unset is suggested  instead of forcing the browser to accept
-# incorrect  metadata.
-#
-DefaultType None
-
 
 #
 # HostnameLookups: Log the names of clients or just their IP addresses
@@ -238,14 +146,7 @@ ErrorLog ${APACHE_LOG_DIR}/error.log
 # Possible values include: debug, info, notice, warn, error, crit,
 # alert, emerg.
 #
-LogLevel crit
-
-# Include module configuration:
-Include mods-enabled/*.load
-Include mods-enabled/*.conf
-
-# Include list of ports to listen on and which to use for name based vhosts
-Include ports.conf
+LogLevel warn
 
 #
 # The following directives define some format nicknames for use with
@@ -258,14 +159,50 @@ LogFormat "%h %l %u %t \"%r\" %>s %O" common
 LogFormat "%{Referer}i -> %U" referer
 LogFormat "%{User-agent}i" agent
 
+# Include module configuration:
+Include mods-enabled/*.load
+Include mods-enabled/*.conf
+
+# Include list of ports to listen on and which to use for name based vhosts
+Include ports.conf
+
+#
+# AccessFileName: The name of the file to look for in each directory
+# for additional configuration directives.  See also the AllowOverride
+# directive.
+#
+AccessFileName .htaccess
+
+#
+# The following lines prevent .htaccess and .htpasswd files from being
+# viewed by Web clients.
+#
+<FilesMatch "^\.ht">
+	Require all denied
+</FilesMatch>
+
+# Sets the default security model of the Apache2 HTTPD server. It does
+# not allow access to the root filesystem outside of /usr/share and /var/www.
+# The former is used by web applications packaged in Debian,
+# the latter may be used for local directories served by the web server. If
+# your system is serving content from a sub-directory in /srv you must allow
+# access here, or in any related virtual host.
+<Directory />
+	Options FollowSymLinks
+	AllowOverride None
+	Require all denied
+</Directory>
+
 # Include of directories ignores editors' and dpkg's backup files,
 # see the comments above for details.
 
 # Include generic snippets of statements
-Include conf.d/
+IncludeOptional conf-enabled/*.conf
 
 # Include the virtual host configurations:
-Include sites-enabled/
+IncludeOptional sites-enabled/*.conf
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
 
 # Security policy
 ServerSignature Off
@@ -276,12 +213,6 @@ ServerTokens Prod
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Content-Security-Policy "default-src data: 'self' 'unsafe-inline' 'unsafe-eval'"
 </IfModule>
-
-# Deny by default, enbable by whitelist
-<Directory />
-	   Order deny,allow
-	   Deny from all
-</Directory>
 
 # Disable E-tag
 FileETag none
@@ -300,53 +231,53 @@ AcceptFilter http none
 # Block bad bots
 <IfModule mod_setenvif.c>
   <LocationMatch ".*">
-    BrowserMatchNoCase AhrefsBot bad_bot # AhrefsBot
-    BrowserMatchNoCase Alexibot bad_bot # Alexibot
-    BrowserMatchNoCase gigabot bad_bot # gigabot
-    BrowserMatchNoCase java bad_bot # java
-    BrowserMatchNoCase Arachnophilia bad_bot # Arachnophilia
-    BrowserMatchNoCase grapeshot bad_bot # grapeshot
-    BrowserMatchNoCase SafetyNet bad_bot # SafetyNet
-    BrowserMatchNoCase linklooker bad_bot # linklooker
-    BrowserMatchNoCase INGRID bad_bot # INGRID
-    BrowserMatchNoCase Enigma bad_bot # EnigmaBot
-    BrowserMatchNoCase BackDoorBot bad_bot # BackDoorBot
-    BrowserMatchNoCase Bullseye bad_bot # Bullseye
-    BrowserMatchNoCase msnbot bad_bot # msnbot
-    BrowserMatchNoCase BlowFish bad_bot # BlowFish
-    BrowserMatchNoCase Black bad_bot # Black
-    BrowserMatchNoCase Ezoom bad_bot # Ezoom
-    BrowserMatchNoCase 360Spider bad_bot # 360Spider
-    BrowserMatchNoCase MJ12bot bad_bot # MJ12bot
-    BrowserMatchNoCase checks.panopta.com bad_bot # Panopta
-    BrowserMatchNoCase mon.itor.us bad_bot # Monitor.us (service de monitoring)
-    BrowserMatchNoCase mediawords bad_bot # Mediawords (inconnu)
-    BrowserMatchNoCase SurveyBot bad_bot # Netcraft survey bot (sondage)
-    BrowserMatchNoCase Netcraft bad_bot # Netcraft survey bot (sondage)
-    BrowserMatchNoCase CareerBot bad_bot # CarrerBot (recherche des offres d'emploi sur le web)
-    BrowserMatchNoCase TweetmemeBot bad_bot # CarrerBot (recherche des offres d'emploi sur le web)
-    BrowserMatchNoCase Aboundex bad_bot # Aboundex (spam)
-    BrowserMatchNoCase WASALive-Bot bad_bot # WasaLive (spam)
-    BrowserMatchNoCase Butterfly bad_bot # Butterfly (cybercriminal)
-    BrowserMatchNoCase ZmEu bad_bot # ZmEu (cybercriminal)
-    BrowserMatchNoCase Morfeus bad_bot # Morfeus (cybercriminal)
-    BrowserMatchNoCase Kraken bad_bot # Kraken (cybercriminal)
-    BrowserMatchNoCase Snoopy bad_bot # Snoopy (cybercriminal)
-    BrowserMatchNoCase CompSpyBot bad_bot # CompSpyBot (inconnu)
-    BrowserMatchNoCase IstellaBot bad_bot # IstellBot (inconnu)
-    BrowserMatchNoCase Daumoa bad_bot # Daumoa (Inconnu)
-    BrowserMatchNoCase Exabot bad_bot # Exabot (Moteur de recherche)
-    BrowserMatchNoCase SemrushBot bad_bot # SemrushBot (Moteur de recherche)
-    BrowserMatchNoCase Sosospider bad_bot # Sosospider (inconnu)
-    BrowserMatchNoCase findlinks bad_bot # findlinks (seo)
-    BrowserMatchNoCase SISTRIX bad_bot # SISTRIX (seo)
-    BrowserMatchNoCase uMBot bad_bot # uMBot (seo)
-    BrowserMatchNoCase VoilaBot bad_bot # VoilaBot (inconnu)
-    BrowserMatchNoCase SeznamBot bad_bot # SeznameBot (seo)
-    BrowserMatchNoCase ShowyouBot bad_bot # ShowyouBot (inconnu)
-    BrowserMatchNoCase Lipperhey bad_bot # Lipperhey (inconnu)
-    BrowserMatchNoCase niki-bot bad_bot # niki-bot (inconnu)
-    BrowserMatchNoCase StatusCake bad_bot # status cake (monitoring)
+    BrowserMatchNoCase "AhrefsBot" bad_bot # AhrefsBot
+    BrowserMatchNoCase "Alexibot" bad_bot # Alexibot
+    BrowserMatchNoCase "gigabot" bad_bot # gigabot
+    BrowserMatchNoCase "java" bad_bot # java
+    BrowserMatchNoCase "Arachnophilia" bad_bot # Arachnophilia
+    BrowserMatchNoCase "grapeshot" bad_bot # grapeshot
+    BrowserMatchNoCase "SafetyNet" bad_bot # SafetyNet
+    BrowserMatchNoCase "linklooker" bad_bot # linklooker
+    BrowserMatchNoCase "INGRID" bad_bot # INGRID
+    BrowserMatchNoCase "Enigma" bad_bot # EnigmaBot
+    BrowserMatchNoCase "BackDoorBot" bad_bot # BackDoorBot
+    BrowserMatchNoCase "Bullseye" bad_bot # Bullseye
+    BrowserMatchNoCase "msnbot" bad_bot # msnbot
+    BrowserMatchNoCase "BlowFish" bad_bot # BlowFish
+    BrowserMatchNoCase "Black" bad_bot # Black
+    BrowserMatchNoCase "Ezoom" bad_bot # Ezoom
+    BrowserMatchNoCase "360Spider" bad_bot # 360Spider
+    BrowserMatchNoCase "MJ12bot" bad_bot # MJ12bot
+    BrowserMatchNoCase "checks.panopta.com" bad_bot # Panopta
+    BrowserMatchNoCase "mon.itor.us" bad_bot # Monitor.us (service de monitoring)
+    BrowserMatchNoCase "mediawords" bad_bot # Mediawords (inconnu)
+    BrowserMatchNoCase "SurveyBot" bad_bot # Netcraft survey bot (sondage)
+    BrowserMatchNoCase "Netcraft" bad_bot # Netcraft survey bot (sondage)
+    BrowserMatchNoCase "CareerBot" bad_bot # CarrerBot (recherche des offres d'emploi sur le web)
+    BrowserMatchNoCase "TweetmemeBot" bad_bot # CarrerBot (recherche des offres d'emploi sur le web)
+    BrowserMatchNoCase "Aboundex" bad_bot # Aboundex (spam)
+    BrowserMatchNoCase "WASALive-Bot" bad_bot # WasaLive (spam)
+    BrowserMatchNoCase "Butterfly" bad_bot # Butterfly (cybercriminal)
+    BrowserMatchNoCase "ZmEu" bad_bot # ZmEu (cybercriminal)
+    BrowserMatchNoCase "Morfeus" bad_bot # Morfeus (cybercriminal)
+    BrowserMatchNoCase "Kraken" bad_bot # Kraken (cybercriminal)
+    BrowserMatchNoCase "Snoopy" bad_bot # Snoopy (cybercriminal)
+    BrowserMatchNoCase "CompSpyBot" bad_bot # CompSpyBot (inconnu)
+    BrowserMatchNoCase "IstellaBot" bad_bot # IstellBot (inconnu)
+    BrowserMatchNoCase "Daumoa" bad_bot # Daumoa (Inconnu)
+    BrowserMatchNoCase "Exabot" bad_bot # Exabot (Moteur de recherche)
+    BrowserMatchNoCase "SemrushBot" bad_bot # SemrushBot (Moteur de recherche)
+    BrowserMatchNoCase "Sosospider" bad_bot # Sosospider (inconnu)
+    BrowserMatchNoCase "findlinks" bad_bot # findlinks (seo)
+    BrowserMatchNoCase "SISTRIX" bad_bot # SISTRIX (seo)
+    BrowserMatchNoCase "uMBot" bad_bot # uMBot (seo)
+    BrowserMatchNoCase "VoilaBot" bad_bot # VoilaBot (inconnu)
+    BrowserMatchNoCase "SeznamBot" bad_bot # SeznameBot (seo)
+    BrowserMatchNoCase "ShowyouBot" bad_bot # ShowyouBot (inconnu)
+    BrowserMatchNoCase "Lipperhey" bad_bot # Lipperhey (inconnu)
+    BrowserMatchNoCase "niki-bot" bad_bot # niki-bot (inconnu)
+    BrowserMatchNoCase "StatusCake" bad_bot # status cake (monitoring)
 
     Order Deny,Allow
     Deny from env=bad_bot
