@@ -115,6 +115,8 @@ Note: If you’re not on Ubuntu, it's possible to get a 404 when running third c
 
         # fusermount -u /var/www/*Project*
 
+- You might need a few other tweaks to make sshfs works properly (permissions, conf, ...). Watch the error messages.
+
 #### Set up a debugger ####
 
 - First, you’ll have to set up xdebug on your virtual machine, with the right options.
