@@ -4,11 +4,13 @@
   with_items:
     - deb http://packages.dotdeb.org wheezy-php56 all
     - deb-src http://packages.dotdeb.org wheezy-php56 all
+  when: services.external_repos
 
 - name: Packages - Add dotdeb key
   apt_key: url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2098A6E
   tags:
     - creates
+  when: services.external_repos
 
 - name: Packages - Install web packages
   apt: name={{ item }} state=present update_cache=yes force=yes
@@ -34,8 +36,8 @@
     - ruby-dev
     - make
     - gcc
-  when: env == 'local'
+  when: env == 'local' and services.compass
 
 - name: Packages - Install compass
   gem: name=compass state=latest
-  when: env == 'local'
+  when: env == 'local' and services.compass

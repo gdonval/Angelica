@@ -1,7 +1,9 @@
 # Listen for virtual host requests on all IP addresses - it activates SNI
 NameVirtualHost *:443
 NameVirtualHost *:80
+{% if services.adminer %}
 NameVirtualHost *:{{ports.althttp}}
+{% endif %}
 
 # Go ahead and accept connections for these vhosts
 # from non-SNI clients
@@ -73,6 +75,8 @@ SSLStrictSNIVHostCheck off
     </Directory>
 </VirtualHost>
 
+
+{% if services.adminer %}
 # {{project.server.database.name}} vhost - adminer
 <VirtualHost *:{{ports.althttp}}>
     {% if env == 'prod' %}
@@ -103,3 +107,4 @@ SSLStrictSNIVHostCheck off
         Allow from all
     </Directory>
 </VirtualHost>
+{% endif %}

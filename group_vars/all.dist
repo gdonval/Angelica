@@ -9,6 +9,13 @@ ports:
   althttp: 8888
   smtp: 465
 
+# Choose the services to be installed
+# True use or install the service / False do not use nor install it
+services:
+  dotdeb: True
+  compass: True
+  adminer: True
+
 
 # The application environment
 # It will load the corresponding configuration

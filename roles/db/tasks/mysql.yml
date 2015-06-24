@@ -1,11 +1,13 @@
 ---
 - name: MySQL - Get MariaDB key
   apt_key: url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xCBCB082A1BB943DB
+  when: services.external_repos
   tags:
     - creates
 
 - name: MySQL - Add MariaDB repository
   apt_repository: repo='deb http://mirror.jmu.edu/pub/mariadb/repo/5.5/debian wheezy main' state=present
+  when: services.external_repos
   tags:
     - creates
 

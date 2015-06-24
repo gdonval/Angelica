@@ -16,3 +16,4 @@
 
 # Configure Adminer
 - include: adminer.yml tags=adminer
+  when: services.adminer
