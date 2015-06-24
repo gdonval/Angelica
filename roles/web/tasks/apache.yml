@@ -1,6 +1,6 @@
 ---
 - name: Apache2 - Add main website
-  template: src=etc/apache2/sites-available/project.com.j2 dest=/etc/apache2/sites-available/{{project.server.application.name}} mode=0644
+  template: src=etc/apache2/sites-available/project.com.j2 dest=/etc/apache2/sites-available/{{project.server.application.name}}.conf mode=0644
 
 - name: Apache2 - Activate main website
   command: a2ensite {{project.server.application.name}} creates=/etc/apache2/sites-enabled/{{project.server.application.name}}
@@ -8,7 +8,7 @@
     - restart apache2
 
 - name: Apache2 - Disable default website
-  command: a2dissite default
+  command: a2dissite 000-default
   notify:
     - restart apache2
 

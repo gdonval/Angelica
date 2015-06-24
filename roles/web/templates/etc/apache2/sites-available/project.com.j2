@@ -70,8 +70,7 @@ SSLStrictSNIVHostCheck off
     <Directory "{{ app.webpath }}{{ app.webdir }}">
         Options -Indexes +FollowSymLinks +Includes
         AllowOverride All
-        Order allow,deny
-        Allow from all
+        Require all granted
     </Directory>
 </VirtualHost>
 
@@ -103,8 +102,7 @@ SSLStrictSNIVHostCheck off
     <Directory "{{ project.server.database.path }}">
         Options -Indexes +FollowSymLinks +Includes
         AllowOverride All
-        Order allow,deny
-        Allow from all
+        Require all granted
     </Directory>
 </VirtualHost>
 {% endif %}
