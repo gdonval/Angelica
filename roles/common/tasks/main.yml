@@ -8,7 +8,7 @@
 # Configure SSH
 - include: ssh.yml tags=ssh
 
-## Configure hardware monitoring
+# Configure hardware monitoring
 - include: monitoring.yml tags=monitoring
   when: env != 'local'
 
