@@ -1,10 +1,8 @@
 ---
-# Install DBMS
-- include: mysql.yml tags=mysql
+- include: check.yml tags=always
 
-# Install script
+- include: mariadb.yml tags=mariadb
+  when: mariadb.enabled
+
 - include: scripts.yml tags=scripts
-
-# Install crons
-- include: cron.yml tags=cron
-  when: env == 'prod'
+  when: script.enabled

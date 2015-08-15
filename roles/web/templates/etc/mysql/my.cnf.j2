@@ -1,0 +1,8 @@
+[client]
+{% if mariadb.ssl %}
+ssl                     = 1
+ssl-cert                = /etc/ssl/certs/sql-client-cert.pem
+ssl-key                 = /etc/ssl/private/sql-client-key.pem
+{% endif %}
+port                    = {{ mariadb.port }}
+default-character-set   = utf8

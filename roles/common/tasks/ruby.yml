@@ -1,0 +1,10 @@
+---
+- name: Ruby - Install ruby | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Ruby - Install ruby
+  apt: name={{ item }} state=present update_cache=yes force=yes
+  with_items:
+    - ruby
+    - ruby-dev
+    - rubygems

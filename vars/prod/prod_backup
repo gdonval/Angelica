@@ -1,0 +1,8 @@
+---
+
+# This is the web prod env specific configuration file
+# Feel free to change options
+# It overrides vars/all, vars/db, vars/web, vars/backup, vars/smtp and vars/prod
+
+precedence:
+  31: prod_backup

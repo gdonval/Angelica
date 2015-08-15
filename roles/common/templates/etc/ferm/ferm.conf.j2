@@ -7,40 +7,43 @@ table filter {
         mod state state INVALID DROP;
         mod state state (ESTABLISHED RELATED) ACCEPT;
 
-        # Authorized local
+        # Authorize local
         interface lo ACCEPT;
 
-        # Authorized ping - 1 per second max
+        # Authorize ping - 1 per second max
         proto icmp mod limit limit 1/second ACCEPT;
 
-        # Authorized SSH
-        proto tcp dport {{ports.ssh}} ACCEPT;
-
-        # Authorized DNS
-        proto (tcp udp) dport 53 ACCEPT;
-
-        # Server DB
-        {% if inventory_hostname in groups['dbservers'] %}
-        # Authorized SQL
-        {% for host in groups['webservers'] %}
-        proto tcp dport {{ports.mysql}} saddr {{host}} ACCEPT;
-        {% endfor %}
+        {% if ssh.enabled %}
+            # Authorize SSH
+            proto tcp dport {{ ssh.port }} ACCEPT;
         {% endif %}
 
-        # Server WEB
-        {% if inventory_hostname in groups['webservers'] %}
-        # Authorized SQL
-        {% for host in groups['dbservers'] %}
-        proto tcp dport {{ports.mysql}} saddr {{host}} ACCEPT;
-        {% endfor %}
-
-        # Authorized  HTTP & HTTPS
-        proto tcp dport (http https) ACCEPT;
-
-        {% if services.adminer %}
-        # Authorized alternative HTTP
-        proto tcp dport {{ports.althttp}} ACCEPT;
+        {% if git.enabled %}
+            # Authorize GIT
+            proto tcp dport 9418 ACCEPT;
         {% endif %}
+
+        {% if apache.enabled and inventory_hostname in groups['web'] %}
+            # Authorize  HTTP & HTTPS
+            proto tcp dport (http https) ACCEPT;
+
+            {% if adminer.enabled %}
+                # Authorize alternative HTTP
+                proto tcp dport {{ adminer.port }} ACCEPT;
+            {% endif %}
+        {% endif %}
+
+        {% if mariadb.enabled %}
+
+            {% if inventory_hostname in groups['db'] %}
+                # MariaDB - Accept requests from web and db servers
+                {% for host in groups['web'] %}
+                    proto tcp dport {{ mariadb.port }} saddr {{ host }} ACCEPT;
+                {% endfor %}
+                {% for host in groups['db'] %}
+                    proto tcp dport {{ mariadb.port }} saddr {{ host }} ACCEPT;
+                {% endfor %}
+            {% endif %}
 
         {% endif %}
 
@@ -71,46 +74,59 @@ table filter {
         mod state state INVALID DROP;
         mod state state (ESTABLISHED RELATED) ACCEPT;
 
-        # Authorized local
+        # Authorize local
         outerface lo ACCEPT;
 
-        # Authorized ping
+        # Authorize ping
         proto icmp ACCEPT;
 
-        # Authorized SSH
-        proto tcp dport {{ports.ssh}} ACCEPT;
-
-        # Authorized NTP
+        # Authorize NTP
         proto tcp dport 123 ACCEPT;
 
-        # Authorized les sorties SMTP
-        proto tcp dport {{ports.smtp}} ACCEPT;
-
-        # Authorized DNS
+        # Authorize DNS
         proto (tcp udp) dport 53 ACCEPT;
 
-        # Authorized  HTTP & HTTPS
+        {% if ssh.enabled %}
+            # Authorize SSH
+            proto tcp dport {{ ssh.port }} ACCEPT;
+        {% endif %}
+
+        {% if git.enabled %}
+            # Authorize GIT
+            proto tcp dport 9418 ACCEPT;
+        {% endif %}
+
+        {% if smtp.enabled %}
+            # Authorize SMTP
+            proto tcp dport {{ smtp.port }} daddr {{ smtp.host }} ACCEPT;
+        {% endif %}
+
+        # Authorize  HTTP & HTTPS - Needed for package manager
         proto tcp dport (http https) ACCEPT;
 
-        {% if services.adminer %}
-        # Authorized alternative HTTP
-        proto tcp dport {{ports.althttp}} ACCEPT;
+        {% if apache.enabled %}
+            {% if adminer.enabled %}
+                # Authorize for adminer
+                proto tcp dport {{ adminer.port }} ACCEPT;
+            {% endif %}
         {% endif %}
 
-        # Server DB
-        {% if inventory_hostname in groups['dbservers'] %}
-        # Authorized MySQL
-        {% for host in groups['webservers'] %}
-        proto tcp dport {{ports.mysql}} daddr {{host}} ACCEPT;
-        {% endfor %}
-        {% endif %}
+        {% if mariadb.enabled %}
 
-        # Server WEB
-        {% if inventory_hostname in groups['webservers'] %}
-        # Authorized MySQL
-        {% for host in groups['dbservers'] %}
-        proto tcp dport {{ports.mysql}} daddr {{host}} ACCEPT;
-        {% endfor %}
+            {% if inventory_hostname in groups['db'] %}
+                # MariaDB - Server DB
+                {% for host in groups['web'] %}
+                    proto tcp dport {{ mariadb.port }} daddr {{ host }} ACCEPT;
+                {% endfor %}
+            {% endif %}
+
+            {% if inventory_hostname in groups['web'] %}
+                # MariaDB - Server WEB
+                {% for host in groups['db'] %}
+                    proto tcp dport {{ mariadb.port }} daddr {{ host }} ACCEPT;
+                {% endfor %}
+            {% endif %}
+
         {% endif %}
     }
     chain FORWARD {

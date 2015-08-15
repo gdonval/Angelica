@@ -12,10 +12,12 @@ Listen 80
 	Listen 443
 </IfModule>
 
-{% if services.adminer %}
-# Listen to HTTP alternative port - for adminer
-Listen {{ports.althttp}}
+{% if adminer.enabled %}
+# Listen to HTTP alternative port
+Listen {{ adminer.port }}
 {% endif %}
 
+# Go ahead and accept connections for vhosts from non-SNI clients
+SSLStrictSNIVHostCheck off
 
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet

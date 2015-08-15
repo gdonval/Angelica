@@ -1,0 +1,52 @@
+---
+
+# This is the local env specific configuration file
+# Feel free to change options
+# It overrides vars/all, vars/db, vars/web, vars/backup and vars/smtp
+
+precedence:
+  20: local
+
+##########
+# Backup #
+##########
+backup:
+  enabled: False
+
+
+##########
+# Smartd #
+##########
+smartd:
+  enabled: False
+
+
+############
+# Fail2ban #
+############
+failtoban:
+  ignore_ip: # Whitelist IPs
+    - 127.0.0.1
+
+
+############
+# Firewall #
+############
+firewall:
+  enabled: True
+
+
+
+#######
+# PHP #
+#######
+php:
+  options:
+    opcache.revalidate_freq: 5
+
+
+################
+# Applications #
+################
+applications:
+  download: False

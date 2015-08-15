@@ -1,0 +1,13 @@
+---
+# This is the staging env specific configuration file
+# Feel free to change options
+# It overrides vars/all, vars/db, vars/web, vars/backup and vars/smtp
+
+precedence: stage
+
+#######
+# PHP #
+#######
+php:
+  options:
+    opcache.revalidate_freq: 600

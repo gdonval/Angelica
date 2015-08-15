@@ -1,0 +1,8 @@
+---
+
+# This is the db specific configuration file
+# Feel free to change options
+# It overrides vars/all
+
+precedence:
+  12: db

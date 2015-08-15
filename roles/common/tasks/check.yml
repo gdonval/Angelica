@@ -1,0 +1,83 @@
+---
+# Users
+- name: Check - Every user have all variables
+  fail: msg="The user “{{ item.name }}” lacks a variable. Check that every user has its own shell, email and groups."
+  when: item.name is defined and (item.shell is not defined or item.groups is not defined or item.email is not defined)
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Check - Users have a right shell
+  fail: msg="The user “{{ item.name }}” don’t have a recognize shell value. Must be /bin/bash, /bin/sh or /bin/zsh."
+  when: item.name is defined and (item.shell != '/bin/bash' and item.shell != '/bin/zsh' and item.shell != '/bin/sh')
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Check - Deployer is in ssh group
+  fail: msg="The deployer “{{ users.deployer.name }}” must be part of the SSH group “{{ ssh.group }}”."
+  when: "'{{ ssh.group }}' not in users.deployer.groups"
+
+- name: Check - Deployer is in sudo group
+  fail: msg="The deployer “{{ users.deployer.name }}” must be part of the sudo group."
+  when: "'sudo' not in users.deployer.groups"
+
+- stat: path="files/sshkeys/{{ item.name }}.pub"
+  register: sshfiles
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: item.name is defined and "'{{ ssh.group }}' in item.groups"
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Check - All necessary sshkeys are present
+  fail: msg="{{ item.item.name }} user is missing its SSH public key. Put the SSH key in files/sshkeys/{{ item.item.name }}.pub."
+  when: item.stat is defined and not item.stat.exists
+  with_items:
+    - "{{ sshfiles.results }}"
+
+# Ruby
+
+- name: Check - If compass is enabled, ruby too
+  fail: msg="Ruby is disabled but it is needed to install compass service. Verify that ruby.enabled = True."
+  when: compass.enabled and not ruby.enabled
+
+# SSH
+
+- name: Check - SSH group name is not one of the users names
+  fail: msg="SSH group name “{{ ssh.group }}” can’t be the same as the user “{{ item.name }}”."
+  when: ssh.enabled and (item.name is defined and item.name == ssh.group)
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+# Shared group
+
+- name: Check - Shared group name is not one of the users names
+  fail: msg="Shared group name “{{ shared_group.name }}” can’t be the same as the user “{{ item.name }}”."
+  when: shared_group.enabled and (item.name is defined and item.name == shared_group.name)
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+# Backup
+
+- name: Check - If backup is enabled, scripts too
+  fail: msg="Scripts is disabled but it is needed to install backup service. Verify that script.enabled = True."
+  when: backup.enabled and not script.enabled
+
+- name: Check - If backup is enabled, SSH too
+  fail: msg="SSH is disabled but it is needed to install backup service. Verify that ssh.enabled = True."
+  when: backup.enabled and not ssh.enabled
+
+- name: Check - Backup user is not one of current user
+  fail: msg="The backup user “{{ backup.user.name }}” can’t be the same as the user “{{ item.name }}”."
+  when: backup.enabled and item.name is defined and item.name == backup.user.name
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Check - Backup user have a right shell
+  fail: msg="The user “{{ item.name }}” don’t have a recognize shell value. Must be /bin/bash, /bin/sh, /bin/zsh or /bin/false."
+  when: backup.enabled and (backup.user.shell != '/bin/bash' and backup.user.shell != '/bin/zsh' and backup.user.shell != '/bin/sh' and backup.user.shell != '/bin/false')

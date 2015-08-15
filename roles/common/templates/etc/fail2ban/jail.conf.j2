@@ -3,18 +3,16 @@
 #
 
 [DEFAULT]
-# Ban time : 1 day
-bantime  = 86400
-# 20 minutes detection period
-findtime = 1200
-# Max retry : 8
-maxretry = 8
-ignoreip = {% for ip in fail2ban.ignoreip %}{{ ip }} {% endfor %}
+bantime  = {{ failtoban.bantime }}
+findtime = {{ failtoban.findtime }}
+maxretry = {{ failtoban.maxretry }}
+ignoreip = {% for ip in failtoban.ignore_ip %}{{ ip }} {% endfor %}
+
 backend  = auto
 
 
 # Email to send alerts
-destemail = {{ email.monitoring }}
+destemail = {{ users.deployer.email }}
 sendername = Fail2Ban
 
 #
@@ -38,19 +36,21 @@ action = %(action_mw)s # default action = %(action_)s
 # JAILS
 #
 
+{% if ssh.enabled %}
 [ssh]
 enabled  = true
-port     = ssh,{{ports.ssh}}
+port     = ssh,{{ ssh.port }}
 filter   = sshd
 logpath  = /var/log/auth.log
 maxretry = 3
 
 [ssh-ddos]
 enabled  = true
-port     = ssh,{{ports.ssh}}
+port     = ssh,{{ ssh.port }}
 filter   = sshd-ddos
 logpath  = /var/log/auth.log
 maxretry = 6
+{% endif %}
 
 [xinetd-fail]
 enabled   = true
@@ -60,7 +60,7 @@ banaction = iptables-multiport-log
 logpath   = /var/log/daemon.log
 maxretry  = 2
 
-{% if inventory_hostname in groups['webservers'] %}
+{% if apache.enabled %}
 [apache]
 enabled  = true
 port     = http,https

@@ -1,22 +1,17 @@
 ---
-- name: Init - Install necessary packages
-  apt: name={{item}} state=present
-  with_items:
-    - sudo
-    - sshpass
-    - zsh
+- name: Init - Update & upgrade servers
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Init - Install sudo
+  apt: name=sudo state=present
 
 - name: Init - Create user deploy
-  user: name={{item.name}} state=present groups=sudo password="{{user_deploy_password}}" update_password=on_create
-  with_items:
-    - "{{user_deploy}}"
+  user: name={{ users.deployer.name }} state=present groups=sudo password="{{ user_deploy_password }}" update_password=on_create generate_ssh_key=yes ssh_key_bits=4096
 
 - name: Init - Set SSH keys for user deploy
-  authorized_key: user={{item.name}} key="{{ lookup('file', '../../../files/sshkeys/'+ item.name +'.pub') }}"
-  with_items:
-    - "{{user_deploy}}"
+  authorized_key: user={{ users.deployer.name }} key="{{ lookup('file', '../../../files/sshkeys/'+ users.deployer.name +'.pub') }}"
 
 - name: Init - Change SSH default port
-  lineinfile: dest=/etc/ssh/sshd_config regexp="^Port " line="Port {{ports.ssh}}" backup=yes owner=root mode=0644 validate='/usr/sbin/sshd -T -f %s'
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^#?\s*Port\s*" line="Port {{ ssh.port }}" backup=yes owner=root mode=0644 validate='/usr/sbin/sshd -T -f %s'
   notify:
     - restart ssh

@@ -1,20 +1,7 @@
 ---
-- name: Packages - Update & upgrade servers with APT
+- name: Packages - Update & upgrade servers
   apt: update_cache=yes upgrade=safe state=latest
 
 - name: Packages - Install common packages
   apt: name={{ item }} state=present
-  with_items:
-    - sudo
-    - sshpass
-    - zsh
-    - vim
-    - htop
-    - openssl
-    - openssh-blacklist
-    - openssh-blacklist-extra
-    - python-pycurl
-    - fail2ban
-    - smartmontools
-    - ferm
-    - gamin
+  with_items: package.packages

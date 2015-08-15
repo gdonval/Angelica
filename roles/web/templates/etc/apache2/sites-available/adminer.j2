@@ -1,0 +1,38 @@
+###
+# Vhost - adminer
+###
+<VirtualHost *:{{ adminer.port }}>
+    {% if ssl.enabled %}
+    SSLEngine On
+
+    SSLCertificateFile /etc/ssl/certs/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.crt
+    SSLCertificateKeyFile /etc/ssl/private/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.key
+    {% if not adminer.autosigned %}
+    SSLCertificateChainFile /etc/ssl/certs/{{ adminer.short_name }}.cabundle
+    {% endif %}
+    SSLOptions +StrictRequire
+    SSLProtocol all -SSLv2 -SSLv3
+    SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
+    SSLHonorCipherOrder on
+    SSLCompression off
+    Header add Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    AddType application/x-x509-ca-cert      .crt
+    AddType application/x-pkcs7-crl         .crl
+    {% endif %}
+
+    ServerAdmin {{ adminer.email }}
+    DocumentRoot "{{ adminer.path }}"
+
+    ServerName {{ mariadb.domain }}
+    ServerAlias {{ adminer.alias }}
+
+    ErrorLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.access.log common
+
+    <Directory "{{ adminer.path }}">
+        Options -Indexes +FollowSymLinks +Includes
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>

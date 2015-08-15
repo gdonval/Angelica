@@ -214,6 +214,15 @@ ServerTokens Prod
     Header set Content-Security-Policy "default-src data: 'self' 'unsafe-inline' 'unsafe-eval'"
 </IfModule>
 
+{% if ssl.enabled %}
+<IfModule mod_ssl.c>
+# SSL stapling
+SSLUseStapling on
+SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
+</IfModule>
+{% endif %}
+
+
 # Disable E-tag
 FileETag none
 
@@ -283,6 +292,3 @@ AcceptFilter http none
     Deny from env=bad_bot
   </LocationMatch>
 </IfModule>
-
-# Server name
-ServerName {{project.server.application.name}}

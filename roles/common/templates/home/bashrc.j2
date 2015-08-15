@@ -3,23 +3,24 @@ if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
 
+{% if motd.enabled %}
 # Display MotD - only on tty
 if [ "$SSH_TTY" ]
 then
     dynmotd
 fi
+{% endif %}
 
 # Set default editor to vim
+export XTERM="xterm-256color"
 EDITOR=vim
 VISUAL=$EDITOR
 export EDITOR VISUAL
 
 # Alias
 alias ls='ls --color=auto'
-alias ll='ls --color=auto -laht'
+alias ll='ls --color=auto -lah'
 alias grep='grep --color=auto'
 
 # Shell coloration
-PS1='\e[32m\u\e[0m@\h \e[31m[{{env}}]\e[0m: \e[37;1m\W\e[0m\$ '
-
-cd /var/
+PS1='\[\e[32m\]\u\[\e[0m\]@\h \[\e[31m\][{{env}}]\[\e[0m\] \[\e[37;1m\]\W\[\e[0m\]$ '

@@ -1,55 +1,56 @@
 ---
-- name: SSL - Copy main application private key
-  copy: src=etc/ssl/private/{{project.server.application.name}}.key dest=/etc/ssl/private/{{project.server.application.name}}.key mode=0400 owner=www-data group=www-data
-  when: env == 'prod'
-  tags:
-    - creates
+- name: SSL - Install ssl | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
 
-- name: SSL - Copy Ca BundleCopie du script qui stocke la passphrase
-  copy: src=etc/ssl/certs/{{project.server.application.name}}.cabundle dest=/etc/ssl/certs/{{project.server.application.name}}.cabundle mode=0400 owner=www-data group=www-data
-  when: env == 'prod'
-  tags:
-    - creates
+- name: SSL - Install ssl
+  apt: name={{ item }} state=present update_cache=yes force=yes
+  with_items:
+    - openssl
+    - openssl-blacklist
+    - openssl-blacklist-extra
 
-- name: SSL - Copy main application certificate
-  copy: src=etc/ssl/certs/{{project.server.application.name}}.crt dest=/etc/ssl/certs/{{project.server.application.name}}.crt mode=0400 owner=www-data group=www-data
-  when: env == 'prod'
-  tags:
-    - creates
+- name: SSL - Copy applications private keys
+  copy: src=files/ssl/private/{{ item.short_name }}.key dest=/etc/ssl/private/{{ item.short_name }}.key mode=0640 owner=root group=ssl-cert
+  when: item.url is defined and (applications.enabled or adminer.enabled) and not item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
 
-- name: SSL - Create autosigned private key with a passphrase
-  command: openssl genrsa -aes128 -out /etc/ssl/private/autosigned.{{project.server.application.name}}.key -passout pass:{{ssl_passphrase}} 4096
-  when: ssl_passphrase != ""
-  args:
-    creates: /etc/ssl/private/autosigned.{{project.server.application.name}}.key
-  tags:
-    - creates
+- name: SSL - Copy Ca certificates
+  copy: src=files/ssl/ca/{{ item.short_name }}.cabundle dest=/etc/ssl/certs/{{ item.short_name }}.cabundle mode=0644 owner=root group=ssl-cert
+  when: item.url is defined and (applications.enabled or adminer.enabled) and not item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
 
-- name: SSL - Create autosigned private key without a passphrase
-  command: openssl genrsa -out /etc/ssl/private/autosigned.{{project.server.application.name}}.key 4096
-  when: ssl_passphrase == ""
-  args:
-    creates: /etc/ssl/private/autosigned.{{project.server.application.name}}.key
-  tags:
-    - creates
-
-- name: SSL - Protect autosigned private key
-  file: path=/etc/ssl/private/autosigned.{{project.server.application.name}}.key owner=www-data group=www-data mode=0400
-  tags:
-    - creates
+- name: SSL - Copy application certificates
+  copy: src=files/ssl/certs/{{ item.short_name }}.crt dest=/etc/ssl/certs/{{ item.short_name }}.crt mode=0644 owner=root group=ssl-cert
+  when: item.url is defined and (applications.enabled or adminer.enabled) and not item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
 
 - name: SSL - Create autosigned certificate
-  command: openssl req -new -nodes -x509 -subj "/C={{company.country_code}}/ST={{company.country}}/L={{company.city}}/O={{company.name}}/CN=*.{{app.url}}" -days 3650 -keyout /etc/ssl/private/autosigned.{{project.server.application.name}}.key -out /etc/ssl/certs/autosigned.{{project.server.application.name}}.crt -extensions v3_ca creates=/etc/ssl/certs/autosigned.{{project.server.application.name}}.crt
-  tags:
-    - creates
+  command: openssl req -nodes -newkey rsa:4096 -x509 -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN={{ item.url }}" -days 3650 -keyout /etc/ssl/private/autosigned.{{ item.short_name }}.key -out /etc/ssl/certs/autosigned.{{ item.short_name }}.crt
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
 
-- name: SSL - Copy passphrase
-  template: src=etc/ssl/private/keypassphrase.sh.j2 dest=/etc/ssl/private/keypassphrase.sh owner=www-data group=www-data mode=0500
-  when: ssl_passphrase != ""
+- name: SSL - Protect autosigned private key
+  file: path=/etc/ssl/private/autosigned.{{ item.short_name }}.key owner=root group=ssl-cert mode=0640
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
 
-- name: SSL - Reconfigure SSL configuration with the new passphrase
-  lineinfile: dest=/etc/apache2/mods-available/ssl.conf regexp="^SSLPassPhraseDialog " line="SSLPassPhraseDialog exec:/etc/ssl/private/keypassphrase.sh"
-  when: ssl_passphrase != ""
-  tags:
-    - creates
+- name: SSL - Set permission for autosigned public key
+  file: path=/etc/ssl/certs/autosigned.{{ item.short_name }}.crt owner=root group=root mode=0777
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
 
+- name: SSL - Add web server user user to the ssl group
+  user: name=www-data state=present groups=ssl-cert
+  when: apache.enabled or nginx.enabled

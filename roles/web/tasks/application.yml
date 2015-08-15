@@ -1,11 +1,27 @@
 ---
-- name: Application - Get from GIT
-  shell: git clone --origin origin --recursive --branch {{project.repository.version}} {{project.repository.url}} {{app.webpath}}
-  args:
-    creates: "{{app.webpath}}"
-  tags:
-    - creates
-    - installapp
+- name: Application - Create directory
+  file: state=directory dest={{ item.path }}{{ item.webdir }} owner=www-data group=www-data mode=0777 recurse=yes
+  with_items: applications.sites
 
-- name: Application - Update permissions of the application
-  file: path={{app.webpath}} owner=www-data group={{shared.group}} recurse=yes state=directory
+- name: Application - Get from GIT
+  git: clone=yes dest={{ item.path }}{{ item.webdir }} repo={{ item.gitrepo }} force=yes update=yes
+  with_items: applications.sites
+  sudo_user: "{{ users.deployer.name }}"
+  when: applications.download
+
+- name: Application - Disable git filemode (handle permissions changes)
+  lineinfile: dest="{{ item.path }}{{ item.webdir }}.git/config" regexp="^\s*filemode\s*=\s*" line="  filemode = false"
+  with_items: applications.sites
+  when: applications.download
+
+- name: Application - Change owner and group
+  file: state=directory dest={{ item.path }}{{ item.webdir }} recurse=yes owner=www-data group=www-data
+  with_items: applications.sites
+
+- name: Application - Permissions for directories
+  command: find {{ item.path }}{{ item.webdir }} -type d -exec chmod 0755 {} \;
+  with_items: applications.sites
+
+- name: Application - Premissions for files
+  command: find {{ item.path }}{{ item.webdir }} -type f -exec chmod 0760 {} \;
+  with_items: applications.sites

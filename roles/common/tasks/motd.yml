@@ -1,0 +1,3 @@
+---
+- name: Motd - Install dynamic motd
+  template: src=usr/local/bin/dynmotd.j2 dest=/usr/local/bin/dynmotd mode=755 owner=root group=root backup=yes

@@ -1,47 +1,37 @@
 ---
-- name: SSH - Remove DSA private key
-  file: state=absent path=/etc/ssh/ssh_host_dsa_key
-  tags:
-    - creates
-
-- name: SSH - Remove DSA public key
-  file: state=absent path=/etc/ssh/ssh_host_dsa_key.pub
-  tags:
-    - creates
+- name: SSH - Create SSH group
+  group: name={{ ssh.group }} state=present system=yes
 
 - name: SSH - Remove RSA private key
   file: state=absent path=/etc/ssh/ssh_host_rsa_key
-  tags:
-    - creates
 
-- name: SSH - Remove DSA private key
+- name: SSH - Remove RSA private key
   file: state=absent path=/etc/ssh/ssh_host_rsa_key.pub
-  tags:
-    - creates
 
 - name: SSH - Remove ECDSA private key
   file: state=absent path=/etc/ssh/ssh_host_ecdsa_key
-  tags:
-    - creates
 
 - name: SSH - Remove ECDSA public key
   file: state=absent path=/etc/ssh/ssh_host_ecdsa_key.pub
-  tags:
-    - creates
+
+- name: SSH - Remove DSA private key
+  file: state=absent path=/etc/ssh/ssh_host_dsa_key
+
+- name: SSH - Remove DSA public key
+  file: state=absent path=/etc/ssh/ssh_host_dsa_key.pub
 
 - name: SSH - Regenerate server RSA key
-  command: ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa -b 4096
-  tags:
-    - creates
+  command: ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa -b 4096 creates=/etc/ssh/ssh_host_rsa_key
 
 - name: SSH - Regenerate server ECDSA key
-  command: ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N '' -t ecdsa -b 521
-  tags:
-    - creates
+  command: ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N '' -t ecdsa -b 521 creates=/etc/ssh/ssh_host_ecdsa_key
 
-- name: SSH - Copy configuration file
-  template: src=etc/ssh/sshd_config.j2 dest=/etc/ssh/sshd_config owner=root mode=0644 validate='/usr/sbin/sshd -T -f %s'
+- name: SSH - Install sshd configuration file
+  template: src=etc/ssh/sshd_config.j2 dest=/etc/ssh/sshd_config owner=root group=root mode=0644 validate='sshd -T -f %s' backup=yes
   notify:
     - restart ssh
-  tags:
-    - creates
+
+- name: SSH - Configure ssh to use the right port
+  lineinfile: dest=/etc/ssh/ssh_config regexp="^#?\s*Port\s*" line="Port {{ ssh.port }}" backup=yes owner=root group=root mode=0644
+  notify:
+    - restart ssh

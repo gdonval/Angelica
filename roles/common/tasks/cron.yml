@@ -1,6 +1,0 @@
----
-- name: Cron - Create backup shared directory
-  shell: mkdir -p {{shared.path}} && chmod -R 2770 {{shared.path}} && chgrp -R {{shared.group}} {{shared.path}}
-  when: env == 'prod'
-  tags:
-    - creates

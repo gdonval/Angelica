@@ -1,14 +1,5 @@
 ---
-- name: Scripts - Install constants file
-  template: src=var/scripts/webConstants.sh.j2 dest={{app.scripts.path + '/webConstants.sh'}} mode=0770
-
-- name: Scripts - Copy other scripts
-  copy: >
-    src={{item}}
-    dest={{app.scripts.path}}
-    mode=750
-  with_fileglob:
-    - "var/scripts/*"
-
-- name: Script - Change group
-  file: path={{app.scripts.path}} group={{shared.group}} recurse=yes
+- name: Script - Install constants file
+  template: src=undefined/scripts/webConstants.sh.j2 dest="{{ script.path }}/{{ item.short_name }}Constants.sh" mode=0755 owner=root group={{ script.group }}
+  when: applications.enabled
+  with_items: applications.sites

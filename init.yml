@@ -2,21 +2,35 @@
 - name: Initialisation. Create the main user for deployment
   hosts: all
   remote_user: root
-  port: "{{ssh_port}}"
+  port: "{{ ssh_port | default('22') }}"
   roles:
     - init
   vars_prompt:
     - name: "letsgo"
-      prompt: "\n\e[1;35mYou’re about to start deployment user creation to install your servers. Before, please check the following points:\n
+      prompt: "\n\e[1;35mYou’re about to initialize deployment. Before, please check the following points:\n
       - All your application servers have the same secure password for root user;\n
-      - \e[0;35minventory/servers \e[1;35mfile is set with the right IPs;\n
-      - you’ve modified the \e[0;35mgroup_vars/all\e[1;35m config file to match your needs;\n
+      - \e[0;35mhosts/\e[3;35menv\e[00m\e[1;35m file is set with the right IPs;\n
+      - you’ve modified the \e[0;35mvars/\e[3;35mconfig\e[00m\e[1;35m config files to match your needs;\n
       - you’ve put the right ssh keys in \e[0;35mfiles/sshkeys \e[1;35maccording to the users you want to create.\n
       - you’ve installed python and ssh on the remote servers. You’ve check that root ssh login is possible.\n
       If you’re ready, then let’s rock! \e[00m\n
       (Press CTRL+C to cancel or Enter to continue)"
     - name: "user_deploy_password"
-      prompt: "Enter the new deployment user password"
+      prompt: "Enter the new password for deployer"
       private: yes
       encrypt: "sha512_crypt"
       confirm: yes
+  tasks:
+    - name: Loaded configuration files by precedence
+      debug: var=precedence
+  vars_files:
+    - vars/all
+    - [ "vars/type/{{ server_smtp }}", "vars/null" ]
+    - [ "vars/type/{{ server_backup }}", "vars/null" ]
+    - [ "vars/type/{{ server_db }}", "vars/null" ]
+    - [ "vars/type/{{ server_web }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_smtp }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_backup }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_db }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_web }}", "vars/null" ]

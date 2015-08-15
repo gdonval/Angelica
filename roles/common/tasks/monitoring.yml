@@ -1,8 +1,0 @@
----
-- name: Monitoring - Copy configuration file
-  template: src=etc/smartd.conf.j2 dest=/etc/smartd.conf owner=root mode=0755
-  notify:
-    - restart smartd
-
-- name: Monitoring - launch at startup
-  command: update-rc.d smartd defaults

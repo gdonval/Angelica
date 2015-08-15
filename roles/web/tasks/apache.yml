@@ -1,9 +1,17 @@
 ---
-- name: Apache2 - Add main website
-  template: src=etc/apache2/sites-available/project.com.j2 dest=/etc/apache2/sites-available/{{project.server.application.name}}.conf mode=0644
+- name: Apache2 - Install apache2 | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Apache2 - Install apache2
+  apt: name=apache2-mpm-prefork state=present update_cache=yes force=yes
+
+- name: Apache2 - Add application websites
+  template: src=etc/apache2/sites-available/project.com.j2 dest=/etc/apache2/sites-available/010-{{ item.url }}.conf mode=0644 owner=root group=root
+  with_items: applications.sites
 
 - name: Apache2 - Activate main website
-  command: a2ensite {{project.server.application.name}} creates=/etc/apache2/sites-enabled/{{project.server.application.name}}
+  command: a2ensite 010-{{ item.url }} creates=/etc/apache2/sites-enabled/010-{{ item.url }}.conf
+  with_items: applications.sites
   notify:
     - restart apache2
 
@@ -13,77 +21,29 @@
     - restart apache2
 
 - name: Apache2 - Enable apache needed modules
-  command: a2enmod {{ item.mod }} creates=/etc/apache2/mods-enabled/{{ item.creates }}
-  with_items:
-    - { mod: php5, creates: php5.load }
-    - { mod: alias, creates: alias.load }
-    - { mod: env, creates: env.load }
-    - { mod: rewrite, creates: rewrite.load }
-    - { mod: headers, creates: headers.load }
-    - { mod: ssl, creates: ssl.load }
+  apache2_module: name={{ item }} state=present
+  with_items: apache.modules | default({})
   notify:
     - restart apache2
-
-- name: Apache2 - Enable PHP extensions
-  command: php5enmod {{ item }}
-  with_items:
-    - pdo_mysql
-    - json
-    - gd
-    - intl
-    - mcrypt
-    - curl
-  notify:
-    - restart apache2
-
-- name: Apache2 - Save default apache configuration
-  command: cp -n /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
-  tags:
-    - creates
 
 - name: Apache2 - Install new apache configuration file
-  template: src=etc/apache2/apache2.conf.j2 dest=/etc/apache2/apache2.conf mode=0644
+  template: src=etc/apache2/apache2.conf.j2 dest=/etc/apache2/apache2.conf mode=0644 owner=root group=root backup=yes
   notify:
     - restart apache2
-
-- name: Apache2 - Save default apache ports configuration
-  command: cp -n /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
-  tags:
-    - creates
 
 - name: Apache2 - Install new apache ports configuration file
-  template: src=etc/apache2/ports.conf.j2 dest=/etc/apache2/ports.conf mode=0644
+  template: src=etc/apache2/ports.conf.j2 dest=/etc/apache2/ports.conf mode=0644 owner=root group=root backup=yes
   notify:
     - restart apache2
-
-- name: Apache2 - Save default apache compression configuration
-  command: cp -n /etc/apache2/mods-available/deflate.conf /etc/apache2/mods-available/deflate.conf.bak
-  tags:
-    - creates
 
 - name: Apache2 - Install apache compression configuration
-  template: src=etc/apache2/mods-available/deflate.conf.j2 dest=/etc/apache2/mods-available/deflate.conf mode=0644
+  template: src=etc/apache2/mods-available/deflate.conf.j2 dest=/etc/apache2/mods-available/deflate.conf mode=0644 owner=root group=root backup=yes
   notify:
     - restart apache2
-
-- name: Apache2 - Save default PHP configuration file
-  command: cp -n /etc/php5/apache2/php.ini /etc/php5/apache2/php.ini.bak
-  tags:
-    - creates
-
-- name: Apache2 - Set server timezone on PHP cli config file
-  lineinfile: dest=/etc/php5/cli/php.ini state=present regexp='^\;date\.timezone' line='date.timezone = \""{{app.timezone}}"\"'
 
 - name: Apache2 - Set main domain name in hosts
-  lineinfile: dest=/etc/hosts state=present line='127.0.0.1    {{project.server.application.name}}'
+  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Project\s*{{ item.0 }}\s*$" line="127.0.0.1    {{ item.1.url }} {{ '#' }} Project {{ item.0 }}"
+  with_indexed_items: applications.sites
 
-- name: Apache2 - Set adminer domain name in hosts
-  lineinfile: dest=/etc/hosts state=present line='127.0.0.1    {{project.server.database.name}}'
-
-- name: Apache2 - Install new PHP configuration file
-  template: src=etc/php5/apache2/php.ini.j2 dest=/etc/php5/apache2/php.ini
-  notify:
-    - restart apache2
-
-- name: Apache2 - Update permissions on web folder
+- name: Apache2 - Set permissions on web folder
   file: path=/var/www/ owner=www-data group=www-data mode=2750 recurse=yes

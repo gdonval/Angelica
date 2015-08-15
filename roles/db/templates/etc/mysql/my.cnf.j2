@@ -1,24 +1,39 @@
 [client]
-port = {{ports.mysql}} # default: 3306
+port = {{ mariadb.port }} # default: 3306
 socket = /var/run/mysqld/mysqld.sock
 
 [mysqld]
-port = {{ports.mysql}} # default: 3306
-max_connections = {{ mysql.config.max_connections }} # default: 100
-max_connect_errors = {{ mysql.config.max_connect_errors }} # default: 10 - Advise: Choose a very high value
-sort_buffer_size = {{ mysql.config.sort_buffer_size }} # default: 4M
+{% if mariadb.ssl %}
+ssl = 1
+ssl-cipher = DHE-RSA-AES256-SHA
+ssl-ca = /etc/ssl/certs/sql-ca.pem
+ssl-cert = /etc/ssl/certs/sql-server-cert.pem
+ssl-key = /etc/ssl/private/sql-server-key.pem
+{% endif %}
 
-table_open_cache = {{ mysql.config.table_open_cache }} # default: 400 - Advise: number of database table, multiplied by 10
+log-error = /var/log/mysql/error
+log-warnings = 2
 
-query_cache_limit = {{ mysql.config.query_cache_limit }} # default: 128K - Maximum cache for a single request
-query_cache_size = {{ mysql.config.query_cache_size }} # default: 64M - Advise: Request cache - can be high if the server got a lot of RAM
+# Skip reverse DNS lookup of clients
+skip_name_resolve
 
-thread_concurrency = {{ mysql.config.total_cpu_core * 2 }} # Choose twice the number of CPU
+port = {{ mariadb.port }} # default: 3306
+max_connections = {{ mariadb.options.max_connections }} # default: 100
+max_connect_errors = {{ mariadb.options.max_connect_errors }} # default: 10 - Advise: Choose a very high value
+sort_buffer_size = {{ mariadb.options.sort_buffer_size }} # default: 4M
 
-innodb_buffer_pool_size = {{ (mysql.config.total_ram * 80 / 100)|round|int }}M # default: 256M
-innodb_log_buffer_size = {{ mysql.config.innodb_log_buffer_size }} # default: 8M
-innodb_buffer_pool_instances = {{ mysql.config.innodb_buffer_pool_instances }} # default: 1 - Advice: Share RAM in multiple instances
+table_open_cache = {{ mariadb.options.table_open_cache }} # default: 400 - Advise: number of database table, multiplied by 10
 
-collation-server = utf8_general_ci
-character-set-server = utf8
+query_cache_limit = {{ mariadb.options.query_cache_limit }} # default: 128K - Maximum cache for a single request
+query_cache_size = {{ mariadb.options.query_cache_size }} # default: 64M - Advise: Request cache - can be high if the server got a lot of RAM
+
+thread_concurrency = {{ mariadb.options.thread_concurrency }} # Choose twice the number of CPU
+
+innodb_buffer_pool_size = {{ mariadb.options.innodb_buffer_pool_size }} # default: 256M
+innodb_log_buffer_size = {{ mariadb.options.innodb_log_buffer_size }} # default: 8M
+innodb_buffer_pool_instances = {{ mariadb.options.innodb_buffer_pool_instances }} # default: 1 - Advice: Share RAM in multiple instances
+
+collation_server = {{ mariadb.options.collation_server }}
+character_set_server = {{ mariadb.options.character_set_server }}
+wait_timeout = 60
 

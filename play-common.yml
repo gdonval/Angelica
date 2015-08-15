@@ -1,0 +1,30 @@
+---
+- name: Playbook - Run common server configuration playbook
+  hosts: all
+  remote_user: "{{ users.deployer.name }}"
+  sudo: yes
+  port: "{{ ssh.port }}"
+  roles:
+    - common
+  vars_prompt:
+    - name: "letsgo"
+      prompt: "\n\e[1;35mYou’re about to deploy common configuration to all servers.\n
+      Before, please make sure you’ve run the playbook \e[0;35minit.yml\e[1;35m.\n
+      Note: SSH server keys may have changed, so make sure your local \e[0;35m~/.ssh/known_hosts\e[1;35m is up to date.\n
+      If you’re ready, then let’s rock! \e[00m\n
+      (Press CTRL+C to cancel or Enter to continue)"
+  tasks:
+    - name: Loaded configuration files by precedence
+      debug: var=precedence
+      tags: always
+  vars_files:
+    - vars/all
+    - [ "vars/type/{{ server_smtp }}", "vars/null" ]
+    - [ "vars/type/{{ server_backup }}", "vars/null" ]
+    - [ "vars/type/{{ server_db }}", "vars/null" ]
+    - [ "vars/type/{{ server_web }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_smtp }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_backup }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_db }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_web }}", "vars/null" ]

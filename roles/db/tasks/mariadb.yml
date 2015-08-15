@@ -1,0 +1,108 @@
+---
+- name: MariaDB - Install MariaDb | upgrade servers
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: MariaDB - Install MariaDB
+  apt: name={{ item }} state=present update_cache=true
+  with_items:
+    - mariadb-client
+    - mariadb-server
+    - python-mysqldb
+  tags:
+    - packages
+
+- name: MariaDB - Install server configuration file
+  template: src=etc/mysql/my.cnf.j2 dest=/etc/mysql/my.cnf backup=yes owner=root group=root mode=0644
+  notify:
+    - restart mysql
+
+- name: MariaDB - Create a new DBMS root user
+  mysql_user: name={{ mariadb.root }} password={{ db_root_password }} state=present priv=*.*:ALL,GRANT host=localhost
+  ignore_errors: yes
+  notify:
+    - restart mysql
+
+- name: MariaDB - Create applications databases
+  mysql_db: name={{ item }} state=present login_user={{ mariadb.root }} login_password={{ db_root_password }} encoding=utf8
+  when: applications.enabled and item is defined
+  with_items: applications.sites | map(attribute='dbnames') | list
+  notify:
+    - restart mysql
+
+- name: MariaDB - Get Sql files to import
+  stat: path="files/db/{{ item }}.sql"
+  register: sqls
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: item is defined
+  with_items: applications.sites | map(attribute='dbnames') | list
+
+- name: MariaDB - Copy database temporary file
+  copy: src=../../../files/db/{{ item.item }}.sql dest=/tmp/{{ item.item }}.sql
+  when: item.stat.exists
+  with_items: sqls.results
+
+- name: MariaDB - Import projects databases
+  mysql_db: name={{ item.item }} state=import target=/tmp/{{ item.item }}.sql login_user={{ mariadb.root }} login_password={{ db_root_password }} encoding=utf8
+  when: item.stat.exists
+  with_items: sqls.results
+  notify:
+    - restart mysql
+
+- name: MariaDB - Remove database temporary file
+  file: dest=/tmp/{{ item.item }}.sql state=absent
+  when: item.stat.exists
+  with_items: sqls.results
+
+- name: MariaDB - Remove distant user
+  mysql_user: name={{ mariadb.user }} host={{ item }} state=absent login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  with_items: "{{ groups['web'] + ['localhost'] }}"
+  notify:
+    - restart mysql
+
+- name: MariaDB - Create distant user
+  mysql_user: name={{ mariadb.user }} password={{ db_user_password }} state=present priv={{ item.1 + "%.*:INSERT,SELECT,UPDATE,DELETE,REQUIRESSL" }} host={{ item.0 }} login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  when: mariadb.ssl and inventory_hostname != item.0
+  with_nested:
+   - groups['web']
+   - applications.sites | map(attribute='dbnames') | list
+  notify:
+    - restart mysql
+
+- name: MariaDB - Create distant user
+  mysql_user: name={{ mariadb.user }} password={{ db_user_password }} state=present priv={{ item.1 + "%.*:INSERT,SELECT,UPDATE,DELETE" }} host={{ item.0 }} login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  when: not mariadb.ssl and inventory_hostname != item.0
+  with_nested:
+   - groups['web']
+   - applications.sites | map(attribute='dbnames') | list
+  notify:
+    - restart mysql
+
+- name: MariaDB - Grant distant user local permissions
+  mysql_user: name={{ mariadb.user }} password={{ db_user_password }} state=present priv={{ item.1 + "%.*:INSERT,SELECT,UPDATE,DELETE"}} host=localhost login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  when: inventory_hostname == item.0
+  with_nested:
+   - groups['web']
+   - applications.sites | map(attribute='dbnames') | list
+  notify:
+    - restart mysql
+
+- name: MariaDB - Remove default root account
+  mysql_user: name=root state=absent host={{ item }} login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  with_items:
+    - localhost
+    - "{{ ansible_hostname }}"
+    - 127.0.0.1
+    - ::1
+  notify:
+    - restart mysql
+
+- name: MariaDB - Copy save database script
+  template: src=undefined/scripts/saveDatabase.sh.j2 dest="{{ script.path }}saveDatabase.sh" mode=0750 owner=root group={{ script.group }}
+  when: script.enabled
+
+- name: MariaDB - Backup database every day, 6AM
+  cron: name="save database" hour="6" minute="0" job="{{ script.path }}saveDatabase.sh" user={{ backup.user.name }}
+  when: script.enabled
+  notify:
+    - restart cron

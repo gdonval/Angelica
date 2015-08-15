@@ -1,0 +1,15 @@
+---
+
+# This is the production env specific configuration file
+# Feel free to change options
+# It overrides vars/all, vars/db, vars/web, vars/backup and vars/smtp
+
+precedence:
+  20: prod
+
+#######
+# PHP #
+#######
+php:
+  options:
+    opcache.revalidate_freq: 600

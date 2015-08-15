@@ -1,5 +1,11 @@
 ---
+- name: Firewall - Install ferm | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Firewall - Install ferm
+  apt: name=ferm state=present
+
 - name: Firewall - Copy configuration template (ferm)
-  template: src=etc/ferm/ferm.conf.j2 dest=/etc/ferm/ferm.conf mode=0644
+  template: src=etc/ferm/ferm.conf.j2 dest=/etc/ferm/ferm.conf mode=0644 owner=root group=root backup=yes
   notify:
     - restart firewall

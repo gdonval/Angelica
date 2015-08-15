@@ -1,5 +1,5 @@
-# Lancement des tests SMART
-# Un test léger une fois par semaine, à 3h pour le premier, 4h pour l'autre
-# Un test complet une fois par mois, à 4h pour le premier, 5h pour l'autre
-/dev/sda -a -d ata -m {{email.monitoring}} -H -l error -l selftest -M test -o on -S on -s (S/../../3/03|L/../15/./04)
-/dev/sdb -a -d ata -m {{email.monitoring}} -H -l error -l selftest -o on -S on -s (S/../../3/04|L/../15/./05)
+# Launch SMART tests
+# A light one, 3AM for the first, 4AM for the others
+# A complete test, 4AM for the first, 5AM for the others
+/dev/sda -a -d ata -m {{ smartd.email }} -H -l error -l selftest -M test -o on -S on -s (S/../../3/03|L/../15/./04)
+/dev/sdb -a -d ata -m {{ smartd.email }} -H -l error -l selftest -o on -S on -s (S/../../3/04|L/../15/./05)

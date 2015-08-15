@@ -1,3 +1,32 @@
 ---
-- name: Adminer - Modify the admin style
-  command: cp /usr/share/adminer/designs/brade/adminer.css /usr/share/adminer/adminer/
+- name: Adminer - Install adminer | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Adminer - Install adminer
+  apt: name=adminer state=present update_cache=yes force=yes
+
+- name: Adminer - Add to apache
+  template: src=etc/apache2/sites-available/adminer.j2 dest=/etc/apache2/sites-available/020-{{ mariadb.domain }}.conf mode=0644 owner=root group=root
+  notify:
+    - restart apache2
+  when: apache.enabled
+
+- name: Adminer - Activate adminer webapp
+  command: a2ensite 020-{{ mariadb.domain }} creates=/etc/apache2/sites-enabled/020-{{ mariadb.domain }}.conf
+  notify:
+    - restart apache2
+  when: apache.enabled
+
+- name: Adminer - Install a decent style for adminer
+  copy: src=usr/share/adminer/adminer.css dest={{ adminer.path }}
+
+- name: Adminer - Limit adminer to PDO if using SSL
+  template: src=usr/share/adminer/adminer/drivers/mysql.inc.php.j2 dest=/usr/share/adminer/adminer/drivers/mysql.inc.php mode=0644 owner=root group=root backup=yes
+  when: ssl.enabled and mariadb.ssl
+
+- name: Adminer - Make sure PDO uses SSL
+  template: src=usr/share/adminer/adminer/include/pdo.inc.php.j2 dest=/usr/share/adminer/adminer/include/pdo.inc.php mode=0644 owner=root group=root backup=yes
+  when: ssl.enabled and mariadb.ssl
+
+- name: Adminer - Set adminer domain name in hosts
+  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Adminer\s*$" line="127.0.0.1    {{ mariadb.domain }} {{ '#' }} Adminer"

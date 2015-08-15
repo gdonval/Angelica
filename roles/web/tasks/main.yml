@@ -1,19 +1,29 @@
 ---
-# Install web packages
-- include: packages.yml tags=packages
+- include: check.yml tags=always
 
-# Configure apache server
-- include: apache.yml tags=apache
+- include: php.yml tags=php
+  when: php.enabled
 
-# Instell internal scripts
-- include: scripts.yml tags=scripts
+- include: compass.yml tags=compass
+  when: compass.enabled and ruby.enabled
 
-# Install application
-- include: application.yml tags=application
-
-# Configure SSL
 - include: ssl.yml tags=ssl
+  when: ssl.enabled
 
-# Configure Adminer
+- include: apache.yml tags=apache
+  when: apache.enabled
+
+- include: git.yml tags=git
+  when: git.enabled
+
 - include: adminer.yml tags=adminer
-  when: services.adminer
+  when: adminer.enabled
+
+- include: application.yml tags=applications
+  when: applications.enabled
+
+- include: mariadb.yml tags=mariadb
+  when: mariadb.enabled
+
+- include: scripts.yml tags=scripts
+  when: script.enabled

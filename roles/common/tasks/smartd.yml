@@ -1,0 +1,16 @@
+---
+- name: Smartd - Install smartmontools | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Smartd - Install smartmontools
+  apt: name=smartmontools state=present
+
+- name: Smartd - Install sm smartd configuration
+  template: src=etc/smartd.conf.j2 dest=/etc/smartd.conf owner=root group=root mode=0644 backup=yes
+  notify:
+    - restart smartd
+
+- name: Smartd - Set deamon to launch at startup
+  lineinfile: dest=/etc/default/smartmontools line="start_smartd=yes" backup=yes owner=root group=root mode=0644
+  notify:
+    - restart ssh

@@ -1,72 +1,83 @@
 ---
-- name: Users - Create all necessary groups for deploy user
-  group: name={{item}} state=present
-  with_items:
-    - "{{user_deploy.groups}}"
+- name: Users - Update & upgrade servers
+  apt: update_cache=yes upgrade=safe state=latest
 
-- name: Users - Create all necessary groups for share user
-  group: name={{item}} state=present
+- name: Users - Install needed package - zsh
+  apt: name=zsh state=present
+  when: item.name is defined and item.shell == '/bin/zsh'
   with_flattened:
-    - "{{shared.group}}"
-    - "{{shared.additionnal_groups}}"
-  tags:
-    - share
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
 
-- name: Users - Create all necessary groups for every other users
-  group: name={{item.1}} state=present
-  with_subelements:
-    - users | default({})
-    - groups
-
-- name: Users - Manage shared/backup account
-  user: name={{shared.user}} state=present groups={{[shared.group] | union(shared.additionnal_groups) | join(",")}} shell=/bin/bash password="*" generate_ssh_key=yes ssh_key_bits=4096 ssh_key_comment=no
-  tags:
-    - share
-
-- name: Share - Authorize shared/backup account to communicate between servers (SFTP)
-  shell: echo `sshpass -p {{root_password}} ssh -o StrictHostKeyChecking=no root@{{item}} "cat /home/{{shared.user}}/.ssh/id_rsa.pub"` >> /home/{{shared.user}}/.ssh/authorized_keys
-  with_items: groups['all']
-  when: "'{{inventory_hostname}}' != '{{item}}'"
-  tags:
-    - creates
-
-- name: Users - Manage all other users
-  user: name={{item.name}} state=present groups="{{item.groups | join(",") }}" shell={{item.shell}} password="*" update_password=on_create
-  when: item.groups is defined
+- name: Users - Install needed package - sudo
+  apt: name=sudo state=present
+  when: item.name is defined and 'sudo' in item.groups
   with_flattened:
-    - users | default({})
-    - "{{[user_deploy]}}"
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
 
-- name: Users - Set SSH keys for all users except share
-  authorized_key: user={{item.name}} key="{{ lookup('file', '../../../files/sshkeys/'+ item.name +'.pub') }}"
-  when: "'{{shared.group}}' in item.groups and item.name is defined"
+- name: Users - Create all groups for all users
+  group: name={{ item }} state=present system=no
+  when: item.name is defined
   with_flattened:
-    - users | default({})
-    - "[{{user_deploy}}]"
+    - users.others.groups | default({})
+    - users.deployer.groups | default({})
+
+- name: Users - Create all users
+  user: name={{ item.name }} state=present groups="{{ item.groups | default({}) | join(",") }}" shell={{ item.shell }} password="*" update_password=on_create generate_ssh_key=yes ssh_key_bits=4096
+  when: item.name is defined and item.groups is defined
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Users - Set SSH keys for all users
+  authorized_key: state=present user={{ item.name }} key="{{ lookup('file', '../../../files/sshkeys/'+ item.name +'.pub') }}"
+  when: "item.name is defined and ssh.enabled and '{{ ssh.group }}' in item.groups"
+  with_flattened:
+    - users.others | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Users - Install sudoers configuration | check
+  shell: dpkg -s sudo | grep Status
+  register: installed_sudo
 
 - name: Users - Install sudoers configuration
-  template: src=etc/sudoers.j2 dest=/etc/sudoers mode=644
+  template: src=etc/sudoers.j2 dest=/etc/sudoers backup=yes mode=0440 owner=root group=root validate='visudo -cf %s'
+  when: installed_sudo.stdout.find('install ok') != -1
 
-- name: Users - Install change password file
+- name: Users - Install the change password script
   template: src=usr/local/bin/change_passwd.j2 dest=/usr/local/bin/change_passwd mode=755
 
-- name: Users - Install dynamic motd
-  template: src=usr/local/bin/dynmotd.j2 dest=/usr/local/bin/dynmotd mode=755
+- name: Users - Install vim configuration | check
+  shell: dpkg -s vim | grep Status
+  register: installed_vim
 
 - name: Users - Install vim configuration
-  template: src=etc/vim/vimrc.j2 dest=/etc/vim/vimrc mode=644
+  template: src=etc/vim/vimrc.j2 dest=/etc/vim/vimrc backup=yes owner=root group=root mode=0644
+  when: installed_vim.stdout.find('install ok') != -1
 
 - name: Users - Install user profile configuration for bash
-  template: src=home/bashrc.j2 dest="/home/{{item.name}}/.bashrc" mode=644 owner="{{item.name}}" group="{{item.name}}"
+  template: src=home/bashrc.j2 dest="/home/{{ item.name }}/.bashrc" mode=644 owner={{ item.name }} group={{ item.name }}
   when: item.name is defined
   with_flattened:
-    - users | default({})
-    - "{{[user_deploy]}}"
+    - users.other | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Users - Install user profile configuration for zsh | check
+  shell: dpkg -s zsh | grep Status
+  register: installed_zsh
 
 - name: Users - Install user profile configuration for zsh
-  template: src=home/zshrc.j2 dest="/home/{{item.name}}/.zshrc" mode=644 owner="{{item.name}}" group="{{item.name}}"
-  when: item.name is defined
+  template: src=home/zshrc.j2 dest="/home/{{ item.name }}/.zshrc" mode=644 owner={{ item.name }} group={{ item.name }}
+  when: item.name is defined and installed_zsh.stdout.find('install ok') != -1
   with_flattened:
-    - users | default({})
-    - "{{[user_deploy]}}"
+    - users.other | default({})
+    - "{{ [users.deployer] }}"
+
+- name: Users - Set skel for bash configuration
+  template: src=home/bashrc.j2 dest="/etc/skel/.bashrc" mode=644 owner=root group=root
+
+- name: Users - Set skel for zsh configuration
+  template: src=home/zshrc.j2 dest="/etc/skel/.zshrc" mode=644 owner=root group=root
+  when: installed_zsh.stdout.find('install ok') != -1
 

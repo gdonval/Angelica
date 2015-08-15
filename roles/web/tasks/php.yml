@@ -1,0 +1,70 @@
+---
+- name: PHP - Add repository for PHP
+  apt_repository: repo={{ item }} state=present
+  with_items:
+    - deb http://packages.dotdeb.org wheezy-php56 all
+    - deb-src http://packages.dotdeb.org wheezy-php56 all
+  when: php.dotdeb
+
+- name: PHP - Add dotdeb key
+  apt_key: url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2098A6E
+  when: php.dotdeb
+
+- name: PHP - Install php5 | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: PHP - Install php5
+  apt: name=php5 state=present update_cache=yes force=yes
+
+- name: PHP - Install php5 extensions
+  apt: name="php5-{{ php.extensions | default({}) | join(',php5-') }}" state=present update_cache=yes force=yes
+
+- name: PHP - Enable PHP extensions
+  command: php5enmod {{ item }}
+  with_items: php.extensions | default({})
+
+- name: PHP - Save default PHP configuration files
+  command: "cp -n {{ item }} {{ item }}.bak"
+  with_items:
+    - /etc/php5/cli/php.ini
+    - /etc/php5/apache2/php.ini
+
+- name: PHP - Disable short open tags in configuration
+  lineinfile: dest={{ item }} state=present regexp='^\;?\s*short_open_tag\s*=' line='short_open_tag = Off'
+  with_items:
+    - /etc/php5/cli/php.ini
+    - /etc/php5/apache2/php.ini
+
+- name: PHP - Disable ASP tags in configuration
+  lineinfile: dest={{ item }} state=present regexp='^\;?\s*asp_tags\s*=' line='asp_tags = Off'
+  with_items:
+    - /etc/php5/cli/php.ini
+    - /etc/php5/apache2/php.ini
+
+- name: PHP - Disable expose PHP tags in configuration
+  lineinfile: dest={{ item }} state=present regexp='^\;?\s*expose_php\s*=' line='expose_php = Off'
+  with_items:
+    - /etc/php5/cli/php.ini
+    - /etc/php5/apache2/php.ini
+
+- name: PHP - Install other PHP configuration for cli
+  lineinfile: dest=/etc/php5/cli/php.ini state=present regexp='^\;?\s*{{ item.key }}\s*=\s*' line="{{ item.key }} = {{ item.value }}"
+  with_dict: "{{ php.options }}"
+
+- name: PHP - Install other PHP configuration for apache
+  lineinfile: dest=/etc/php5/apache2/php.ini state=present regexp='^\;?\s*{{ item.key }}\s*=\s*' line="{{ item.key }} = {{ item.value }}"
+  with_dict: "{{ php.options }}"
+
+- name: PHP - Set server SMTP host in configuration
+  lineinfile: dest=/etc/php5/apache2/php.ini state=present regexp='^\;?\s*SMTP\s*=\s*' line='SMTP = {{ smtp.host }}'
+  with_items:
+    - /etc/php5/cli/php.ini
+    - /etc/php5/apache2/php.ini
+  when: smtp.enabled
+
+- name: PHP - Set server SMTP port in configuration
+  lineinfile: dest=/etc/php5/cli/php.ini state=present regexp='^\;?\s*smtp_port\s*=\s*' line='smtp_port = {{ smtp.port }}'
+  with_items:
+    - /etc/php5/cli/php.ini
+    - /etc/php5/apache2/php.ini
+  when: smtp.enabled

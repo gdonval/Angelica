@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#############
+# Constants #
+#############
+
+# Scripts
+SCRIPT_LOGPATH={{ script.logpath }}
+
+# Ports
+SSH_PORT={{ ssh.port }}
+
+{% if backup.enabled %}
+# Backup
+BACKUP_PATH={{ backup.path }}
+BACKUP_GROUP={{ backup.user.name }}
+BACKUP_USER={{ backup.user.name }}
+BACKUP_DESTINATIONS=({% for host in groups['backup'] %}{{ host }} {% endfor %})
+{% endif %}

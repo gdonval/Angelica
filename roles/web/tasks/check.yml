@@ -1,0 +1,97 @@
+---
+# SSL
+
+- stat: path="files/ssl/private/{{ item.short_name }}.key"
+  register: privates
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: item.url is defined and ssl.enabled and (applications.enabled or adminer.enabled) and not item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+
+- stat: path="files/ssl/ca/{{ item.short_name }}.cabundle"
+  register: cas
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: item.url is defined and ssl.enabled and (applications.enabled or adminer.enabled) and not item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+
+- stat: path="files/ssl/certs/{{ item.short_name }}.crt"
+  register: certs
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: item.url is defined and ssl.enabled and (applications.enabled or adminer.enabled) and not item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+
+- name: Check - If SSL is enabled, and autosigned disabled, the certs private keys are present
+  fail: msg="A private key is lacking for site “{{ item.item.url }}”. Please add the private key “files/ssl/private/{{ item.item.short_name }}.key”. Or, you can disable SSL or enabled autosign certs for this site."
+  when: item.stat is defined and not item.stat.exists
+  with_items:
+    - "{{ privates.results }}"
+
+- name: Check - If SSL is enabled, and autosigned disabled, the certs are present
+  fail: msg="A certificate is lacking for site “{{ item.item.url }}”. Please add the certificate “files/ssl/certs/{{ item.item.short_name }}.crt”. Or, you can disable SSL or enabled autosign certs for this site."
+  when: item.stat is defined and not item.stat.exists
+  with_items:
+    - "{{ certs.results }}"
+
+- name: Check - If SSL is enabled, and autosigned disabled, the ca certs are present
+  fail: msg="A ca certificate is lacking for site “{{ item.item.url }}”. Please add the ca certificate “files/ssl/ca/{{ item.item.short_name }}.cabundle”. Or, you can disable SSL or enabled autosign certs for this site."
+  when: item.stat is defined and not item.stat.exists
+  with_items:
+    - "{{ cas.results }}"
+
+# Ruby
+
+- name: Check - If compass is enabled, ruby too
+  fail: msg="Ruby is disabled but it is needed to install compass service. Verify that ruby.enabled = True, and re-run play-common.yml."
+  when: compass.enabled and not ruby.enabled
+
+# Adminer
+
+- name: Check - Apache2 or Nginx must be enabled if adminer is enabled
+  fail: msg="No web server will be installed is but it is needed to install adminer service. Verify that apache.enabled = True or nginx.enabled = True."
+  when: adminer.enabled and not apache.enabled and not nginx.enabled
+
+- name: Check - PHP must be enabled if adminer is enabled
+  fail: msg="PHP will not be installed is but it is needed to install adminer service. Verify that php.enabled = True"
+  when: adminer.enabled and not php.enabled
+
+- name: Check - Mariadb must be enabled if adminer is enabled
+  fail: msg="MariaDB will not be installed is but it is needed to install adminer service. Verify that mariadb.enabled = True"
+  when: adminer.enabled and not mariadb.enabled
+
+# Applications
+
+- name: Check - GIT must be enabled if applications download is enabled
+  fail: msg="GIT will not be installed is but it is needed to download applications. Verify that git.enabled = True"
+  when: applications.download and not git.enabled
+
+- name: Check - Application sites must have unique names
+  fail: msg="It seems several sites have the same names “{{ item }}”. Please, choose a different short name for each site."
+  when: "{{ (applications.enabled or adminer.enabled) and ( ( applications.sites | default({})) | map(attribute='name') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
+  with_items: "{{ (applications.sites | default([])) | map(attribute='name') | list }}"
+
+- debug: var="{{ ((applications.sites | default([])) + [adminer]) | map(attribute='short_name') | list }}"
+
+- name: Check - Application sites must have unique short_names
+  fail: msg="It seems several sites have the same short_name “{{ item }}”. Please, choose a different short name for each site."
+  when: "{{ (applications.enabled or adminer.enabled) and ( ( (applications.sites | default({})) + [adminer]) | map(attribute='short_name') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
+  with_items: "{{ ((applications.sites | default([])) + [adminer]) | map(attribute='short_name') | list }}"
+
+- name: Check - Application sites must have unique urls
+  fail: msg="It seems several sites have the same URLs “{{ item }}”. Please, choose a different short name for each site."
+  when: "{{ (applications.enabled or adminer.enabled) and ( ( (applications.sites | default({})) + [adminer]) | map(attribute='url') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
+  with_items: "{{ ((applications.sites | default([])) + [adminer]) | map(attribute='url') | list }}"
+
+- name: Check - Application sites must have unique paths
+  fail: msg="It seems several sites have the same paths “{{ item }}”. Please, choose a different short name for each site."
+  when: "{{ (applications.enabled or adminer.enabled) and ( ( (applications.sites | default({})) + [adminer]) | map(attribute='path') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
+  with_items: "{{ ((applications.sites | default([])) + [adminer]) | map(attribute='path') | list }}"
+
+

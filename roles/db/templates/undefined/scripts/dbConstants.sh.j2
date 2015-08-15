@@ -1,0 +1,10 @@
+#!/bin/bash
+
+######################
+# Database constants #
+######################
+
+DATABASE_NAMES=({% for item in applications.sites | map(attribute='dbnames') %}{{ item | join(' ') }} {% endfor %})
+DATABASE_USER={{ mariadb.root }}
+DATABASE_PASSWORD='{{ db_root_password }}'
+DATABASE_PORT={{ mariadb.port }}

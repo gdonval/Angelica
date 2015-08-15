@@ -1,0 +1,7 @@
+---
+
+# This is the smtp stage env specific configuration file
+# Feel free to change options
+# It overrides vars/all, vars/db, vars/web, vars/backup, vars/smtp and vars/stage
+
+precedence: stage_smtp

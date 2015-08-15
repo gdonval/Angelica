@@ -6,10 +6,14 @@
   service: name=ferm state=restarted
 
 - name: restart smartd
-  shell: /etc/init.d/smartd restart
+  service: name=smartd state=restarted
 
 - name: restart fail2ban
   service: name=fail2ban state=restarted
 
 - name: restart cron
   service: name=cron state=restarted
+
+- name: restart mysql
+  service: name=mysql state=restarted
+  ignore_errors: yes

@@ -3,6 +3,14 @@ if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
 
+{% if motd.enabled %}
+# Display MotD - only on tty
+if [ "$SSH_TTY" ]
+then
+    dynmotd
+fi
+{% endif %}
+
 # Autocompletion
 autoload -U compinit promptinit colors
 compinit
@@ -11,23 +19,16 @@ promptinit
 # This will set the default prompt to the walters theme
 prompt walters
 alias ls='ls --color=auto'
-alias ll='ls -lath --color=auto'
+alias ll='ls -lah --color=auto'
 alias grep='grep --color=auto'
 
+# Set default editor to vim
 export XTERM="xterm-256color"
 export EDITOR="vim"
 VISUAL=$EDITOR
 export EDITOR VISUAL
 
-# Display MotD - only on tty
-if [ "$SSH_TTY" ]
-then
-    dynmotd
-fi
-
 # Shell
 autoload -U colors && colors
 PROMPT="%{$fg[green]%}%n%{$reset_color%}@%m %{$fg[red]%}[{{env}}]%{$reset_color%} %{$fg_bold[white]%}%1~ %{$reset_color%}%# "
 RPROMPT="[%{$fg_no_bold[magenta]%}%?%{$reset_color%}]"
-
-cd /var/

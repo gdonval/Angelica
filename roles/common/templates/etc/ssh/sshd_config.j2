@@ -1,5 +1,5 @@
 # Port
-Port {{ports.ssh}}
+Port {{ ssh.port }}
 
 # Use only SSH 2
 Protocol 2
@@ -31,7 +31,7 @@ IgnoreRhosts yes
 StrictModes yes
 
 # Only authorized users can connect
-AllowGroups {{shared.group}}
+AllowGroups {{ ssh.group }}
 
 # Pubkey authentication only
 PubkeyAuthentication yes
@@ -52,4 +52,4 @@ ClientAliveCountMax 0
 X11Forwarding no
 
 # SFTP authorization
-Subsystem sftp {{ sftp.path }}
+Subsystem sftp {{ ssh.sftp.path }}

@@ -1,0 +1,56 @@
+---
+- name: Backup - Install rsync | update & upgrade servers
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Packages - Install rsync
+  apt: name=rsync state=present
+
+- name: Backup - Create backup user
+  user: name={{ backup.user.name }} groups="{{ ssh.group }},{{ script.group }}" state=present shell={{ backup.user.shell }} password="*" update_password=on_create home={{ backup.user.home }}
+
+- name: Backup - Create backup user SSH directory
+  file: state=directory path={{ backup.user.home }}/.ssh owner={{ backup.user.name }} group={{ backup.user.name }} mode=0700
+
+- name: Backup - Create sshkeys for backup user
+  command: ssh-keygen -f ./files/backup -N '' -t rsa -b 4096 -C '' creates=files/backup
+  run_once: true
+  sudo: no
+  delegate_to: 127.0.0.1
+
+- name: Backup - Change permissions for local keys
+  file: state=file path=files/backup mode=644
+  run_once: true
+  delegate_to: 127.0.0.1
+  sudo: no
+
+- name: Backup - Set Backup user SSH private key
+  copy: src=files/backup dest={{ backup.user.home }}/.ssh/id_rsa owner={{ backup.user.name }} group={{ backup.user.name }} mode=0600 force=no
+
+- name: Backup - Remove local copy of backup user private key
+  file: state=absent path=files/backup
+  run_once: true
+  sudo: no
+  delegate_to: 127.0.0.1
+
+- name: Backup - Set backup user SSH public key
+  copy: src=files/backup.pub dest={{ backup.user.home }}/.ssh/id_rsa.pub owner={{ backup.user.name }} group={{ backup.user.name }} mode=0644 force=no
+
+- name: Backup - Set Backup user authorized_keys
+  authorized_key: state=present user={{ backup.user.name }} key="{{ lookup('file', '../../../files/backup.pub') }}"
+
+- name: Backup - Remove local copy of backup user public key
+  file: state=absent path=files/backup.pub
+  run_once: true
+  sudo: no
+  delegate_to: 127.0.0.1
+
+- name: Backup - Create backup sync directory
+  file: state=directory owner={{ backup.user.name }} group={{ backup.user.name }} mode=0750 path={{ backup.path }}
+
+- name: Backup - Copy backup sync script
+  template: src=undefined/scripts/synchroniseBackup.sh.j2 dest="{{ script.path }}synchroniseBackup.sh" mode=0750 owner={{ backup.user.name }} group={{ script.group }}
+
+- name: Backup - Set cron for backups sync, every day, 6:30AM
+  cron: name="Synchronize backups" hour="6" minute="30" job="{{ script.path }}synchroniseBackup.sh" user={{ backup.user.name }}
+  notify:
+    - restart cron

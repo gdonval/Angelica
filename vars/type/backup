@@ -1,0 +1,8 @@
+---
+
+# This is the backup specific configuration file
+# Feel free to change options
+# It overrides vars/all
+
+precedence:
+  11: backup

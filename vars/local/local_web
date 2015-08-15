@@ -1,0 +1,8 @@
+---
+
+# This is the web local env specific configuration file
+# Feel free to change options
+# It overrides vars/all, vars/db, vars/web, vars/backup, vars/smtp and vars/local
+
+precedence:
+  33: local_web
