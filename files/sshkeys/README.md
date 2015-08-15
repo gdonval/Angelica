@@ -1,7 +1,7 @@
 ## SSH keys files ##
 ---
 
-<p align="center"><img src="../ange.png" /></p>
+<p align="center"><img src="../../ange.png" /></p>
 
 **Public** SSH keys must be placed here.
 

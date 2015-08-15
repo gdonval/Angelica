@@ -1,7 +1,7 @@
 ## Script files ##
 ---
 
-<p align="center"><img src="../ange.png" /></p>
+<p align="center"><img src="../../ange.png" /></p>
 
 Scripts must be placed here.
 

@@ -1,7 +1,7 @@
 ## SSL files ##
 ---
 
-<p align="center"><img src="../ange.png" /></p>
+<p align="center"><img src="../../ange.png" /></p>
 
 SSL certs must be placed here.
 

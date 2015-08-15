@@ -1,7 +1,7 @@
 ## Database dumps ##
 ---
 
-<p align="center"><img src="../ange.png" /></p>
+<p align="center"><img src="../../ange.png" /></p>
 
 Database dumps must be placed here.
 

@@ -1,7 +1,7 @@
 # Angelica Project #
 ---
 
-<p align="center"><img src="../ange.png" /></p>
+<p align="center"><img src="ange.png" /></p>
 
 
 ## Automatic web servers installation ##
