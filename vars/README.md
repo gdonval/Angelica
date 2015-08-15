@@ -1,14 +1,15 @@
-## Group vars files documentation ##
+## Vars files ##
 ---
 
-___________________________________![angelica](ange.png)___________________________________
+_______________________________![angelica](../ange.png)_______________________________
 
-Each vars file has its own documentation, however, here is how the hierarchy works.
+Here are **all** the variables files you’ll need. [See ansible documentation here](https://docs.ansible.com/ansible/playbooks_variables.html).
 
-The lowest override the highest.
+What is important here is the order in which the files are loaded. The lowest override the highest.
+
 It means that, the super global file *all* is overriden by global options set in *web*, *db*, *smtp*, which can be overrided by environment-specific files: *local*, *stage* or *prod*.
 
-Here is how variable precedence works
+Here is how variable precedence works:
 
 
     ##########

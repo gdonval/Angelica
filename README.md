@@ -1,15 +1,22 @@
 # Angelica Project #
 ---
 
-__________________________________![angelica](ange.png)__________________________________
+_______________________________![angelica](ange.png)_______________________________
+
 
 ## Automatic web servers installation ##
 
-This is an [Ansible project](https://docs.ansible.com/). The aim is to install full-stack web security-focused servers.
-You can choose and configure what to install. It can adapt to many project.
+This is an [Ansible project](https://docs.ansible.com/).
 For the moment, it can only be runned on Debian Jessie machines.
 
 ---
+
+### The philosophy ###
+
+The vast majority of devops scripts are focused on specific applications. This project aims to make web server installation easy for 90% of cases, just by changing some files and configuration.
+
+
+### Basic environment ###
 
 At least three environments are needed. It can be on a single machine or a infinite number of machines:
 
@@ -32,7 +39,7 @@ At least three environments are needed. It can be on a single machine or a infin
 
         $ sudo aptitude install python ssh
 
-- Verify that [root](http://www.cyberciti.biz/faq/allow-root-account-to-use-ssh-openssh/) and [password] authentication are enabled]- don’t worry, it will be disabled by ansible (the application servers).
+- Verify that [root](http://www.cyberciti.biz/faq/allow-root-account-to-use-ssh-openssh/) and password authentication are enabled - don’t worry, it will be disabled by ansible (the application servers).
 
 ### Deployment (ansible machine) ###
 
@@ -115,7 +122,7 @@ This means:
 ##### Roles and tasks dependencies #####
 
 Roles and tasks are independants. For example, whether or not you install firewall service won’t cause any trouble to other tasks.
-But, be aware that any tasks can use the configuration of another tasks (e.g. it’s important to firewall to know if you install git or not).
+But, be aware that any tasks can use the configuration of another tasks (e.g. it’s important to firewall service to know if you install git service or not).
 This means:
 - it’s better you configure everything before running any playbook;
 - it’s a good idea to re-run the whole playbooks if you enabled a tasks that wasn’t before.
