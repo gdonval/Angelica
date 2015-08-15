@@ -16,14 +16,3 @@
 
 # Ignore netbeans file
 nbproject/
-
-# Ignore config files
-inventory/servers
-group_vars/*
-!group_vars/*.dist
-roles/*/vars/*.yml
-!roles/*/vars/*.yml.dist
-roles/db/files/*
-!roles/db/files/*.dist
-files/sshkeys/*.pub
-!files/sshkeys/*.pub.dist
