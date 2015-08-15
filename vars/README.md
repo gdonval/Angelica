@@ -1,7 +1,7 @@
 ## Vars files ##
 ---
 
-_______________________________![angelica](../ange.png)_______________________________
+<p align="center"><img src="../ange.png" /></p>
 
 Here are **all** the variables files you’ll need. [See ansible documentation here](https://docs.ansible.com/ansible/playbooks_variables.html).
 

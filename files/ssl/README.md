@@ -1,7 +1,7 @@
 ## SSL files ##
 ---
 
-_______________________________![angelica](../../ange.png)_______________________________
+<p align="center"><img src="../ange.png" /></p>
 
 SSL certs must be placed here.
 

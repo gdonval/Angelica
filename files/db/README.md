@@ -1,7 +1,7 @@
 ## Database dumps ##
 ---
 
-_______________________________![angelica](../../ange.png)_______________________________
+<p align="center"><img src="../ange.png" /></p>
 
 Database dumps must be placed here.
 

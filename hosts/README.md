@@ -1,7 +1,7 @@
 ## Hosts ##
 ---
 
-_______________________________![angelica](../ange.png)_______________________________
+<p align="center"><img src="../ange.png" /></p>
 
 Here are ansible hosts files. [See ansible doc here](https://docs.ansible.com/ansible/intro_inventory.html).
 Everytime you start an ansible playbook, you must designate the host file corresponding to the environment you are setting up:

@@ -1,7 +1,7 @@
 ## Script files ##
 ---
 
-_______________________________![angelica](../../ange.png)_______________________________
+<p align="center"><img src="../ange.png" /></p>
 
 Scripts must be placed here.
 

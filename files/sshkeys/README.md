@@ -1,7 +1,7 @@
 ## SSH keys files ##
 ---
 
-_______________________________![angelica](../../ange.png)_______________________________
+<p align="center"><img src="../ange.png" /></p>
 
 **Public** SSH keys must be placed here.
 
