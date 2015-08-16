@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#####################################
+# Script - Update packages with APT #
+#####################################
+
+# Initialisation
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $CURRENT_DIR'/init.sh'
+source $CURRENT_DIR'/globalConstants.sh'
+echo -e "\n\e[0;35m### Update packages with APT - `date`\e[0m"
+
+# Update apt
+echo -e "\e[0;35m### Update packages… \e[0m"
+apt-get update
+echo -e "\e[0;35m### done\e[0m"
+
+exit 0

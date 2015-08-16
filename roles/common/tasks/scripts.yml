@@ -12,10 +12,18 @@
   file: state=directory owner=root group=root mode=0755 path={{ script.path }}
 
 - name: Script - Copy init script
-  template: src=undefined/scripts/init.sh.j2 dest="{{ script.path }}/init.sh" mode=0755 owner=root group={{ script.group }}
+  template: src=undefined/scripts/init.sh.j2 dest="{{ script.path }}init.sh" mode=0755 owner=root group={{ script.group }}
 
 - name: Script - Copy global constants script
-  template: src=undefined/scripts/globalConstants.sh.j2 dest="{{ script.path }}/globalConstants.sh" mode=0755 owner=root group={{ script.group }}
+  template: src=undefined/scripts/globalConstants.sh.j2 dest="{{ script.path }}globalConstants.sh" mode=0755 owner=root group={{ script.group }}
+
+- name: Script - Copy update script
+  template: src=undefined/scripts/aptUpdate.sh.j2 dest="{{ script.path }}aptUpdate.sh" mode=0750 owner=root group={{ script.group }}
+
+- name: Backup - Set cron for updating apt, every day 6:15AM
+  cron: name="Update apt" hour="6" minute="15" job="{{ script.path }}aptUpdate.sh" user=root
+  notify:
+    - restart cron
 
 - name: Script - Copy dummy script
   copy: src=files/scripts/dummyScript.sh dest="{{ script.path }}/dummyScript.sh" mode=0750 owner=root group={{ script.group }}
