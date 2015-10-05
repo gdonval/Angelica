@@ -16,9 +16,15 @@
   notify:
     - restart mysql
 
-- name: MariaDB - Create a new DBMS root user
+- name: MariaDB - Replace the DBMS root user
   mysql_user: name={{ mariadb.root }} password={{ db_root_password }} state=present priv=*.*:ALL,GRANT host=localhost login_user={{ mariadb.root }} login_password={{ db_old_root_password }}
-  ignore_errors: yes
+  when: db_old_root_password != ''
+  notify:
+    - restart mysql
+
+- name: MariaDB - Create a new DBMS root user
+  mysql_user: name={{ mariadb.root }} password={{ db_root_password }} state=present priv=*.*:ALL,GRANT host=localhost
+  when: db_old_root_password == ''
   notify:
     - restart mysql
 
