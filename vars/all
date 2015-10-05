@@ -182,7 +182,7 @@ php:
     upload_max_filesize: 2M # Maximum filesize for an upload by a user
     date.timezone: "Europe/Paris" # Timezone of the server
     pdo_mysql.cache_size: 2000 # Cache size for pdo_mysql
-    session.save_path: \"/var/lib/php5\" # Session save path
+    session.save_path: \"/var/lib/php5/sessions/\" # Session save path
     session.name: PHPSESSID # Session name
     session.cookie_httponly: 1 # Whether or not to add the httpOnly flag to the cookie
     session.gc_probability: 0 # Defines the probability that the 'garbage collection' process is started on every session initialization.
