@@ -306,7 +306,6 @@ mariadb:
     table_open_cache: 400 # default: 400 - Advise: number of database table, multiplied by 10
     query_cache_limit: 2M # default: 128K - Maximum cache for a single request
     query_cache_size: 256M # default: 64M - Advise: Request cache - can be high if the server got a lot of RAM
-    thread_concurrency: 4 # Choose twice the number of CPU of your Db machine
     innodb_buffer_pool_size: 1500M # default: 256M - Choose about 80% RAM of your Db server
     innodb_log_buffer_size: 4M # default: 8M
     innodb_buffer_pool_instances: 2 # default: 1 - Advice: Share RAM in multiple instances

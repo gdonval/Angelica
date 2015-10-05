@@ -27,8 +27,6 @@ table_open_cache = {{ mariadb.options.table_open_cache }} # default: 400 - Advi
 query_cache_limit = {{ mariadb.options.query_cache_limit }} # default: 128K - Maximum cache for a single request
 query_cache_size = {{ mariadb.options.query_cache_size }} # default: 64M - Advise: Request cache - can be high if the server got a lot of RAM
 
-thread_concurrency = {{ mariadb.options.thread_concurrency }} # Choose twice the number of CPU
-
 innodb_buffer_pool_size = {{ mariadb.options.innodb_buffer_pool_size }} # default: 256M
 innodb_log_buffer_size = {{ mariadb.options.innodb_log_buffer_size }} # default: 8M
 innodb_buffer_pool_instances = {{ mariadb.options.innodb_buffer_pool_instances }} # default: 1 - Advice: Share RAM in multiple instances
