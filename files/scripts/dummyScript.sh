@@ -22,9 +22,10 @@ echo -e "\n\e[0;35m### Dummy script as an exemple - `date`\e[0m"
 
 # Description
 echo -e "\e[0;35m### Describe what it does… \e[0m"
-echo "Execute commands here. You have access to multiple env variables in globalConstants.sh and other configuration files."
-echo "This script is located in $CURRENT_DIR. Only users in the script group can see and execute this script."
-echo "Logs are stored in $SCRIPT_LOGPATH. Only users in the script group can see those logs."
+echo "Execute commands here."
+echo "You have access to multiple env variables in globalConstants.sh and other configuration files."
+echo "This script is located in $CURRENT_DIR. Only users in the scripts group can see and execute this script."
+echo "Logs are stored in $SCRIPT_LOGPATH. Only users in the scripts group can see those logs."
 echo -e "\e[0;35m### done\e[0m"
 
 # Action 2

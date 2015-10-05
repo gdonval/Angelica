@@ -25,6 +25,7 @@
   notify:
     - restart cron
 
-- name: Script - Copy dummy script
-  copy: src=files/scripts/dummyScript.sh dest="{{ script.path }}/dummyScript.sh" mode=0750 owner=root group={{ script.group }}
-
+- name: Scripts - Copy other scripts
+  copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
+  with_fileglob:
+    - "../../../files/scripts/*.sh"
