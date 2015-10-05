@@ -15,8 +15,12 @@
       Note: SSH server keys may have changed, so make sure your local \e[0;35m~/.ssh/known_hosts\e[1;35m is up to date.\n
       If you’re ready, then let’s rock! \e[00m\n
       (Press CTRL+C to cancel or Enter to continue)"
+    - name: "db_old_root_password"
+      prompt: "Enter the old password for database root user (the first time, leave this empty)"
+      private: yes
+      confirm: yes
     - name: "db_root_password"
-      prompt: "Enter the password for database root user (the first time, this will be the new password)"
+      prompt: "Enter the new password for database root user"
       private: yes
       confirm: yes
     - name: "db_user_password"

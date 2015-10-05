@@ -17,8 +17,25 @@
     - restart mysql
 
 - name: MariaDB - Create a new DBMS root user
-  mysql_user: name={{ mariadb.root }} password={{ db_root_password }} state=present priv=*.*:ALL,GRANT host=localhost
+  mysql_user: name={{ mariadb.root }} password={{ db_root_password }} state=present priv=*.*:ALL,GRANT host=localhost login_user={{ mariadb.root }} login_password={{ db_old_root_password }}
   ignore_errors: yes
+  notify:
+    - restart mysql
+
+- name: MariaDB - Remove root local user - except for localhost
+  mysql_user: name={{ mariadb.root }} host={{ item }} state=absent login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  with_items: "{{ groups['web'] + ['127.0.0.1'] + [ansible_hostname] + [inventory_hostname] + ['::1'] }}"
+  notify:
+    - restart mysql
+
+- name: MariaDB - Grant local access for root user
+  mysql_user: name={{ mariadb.root }} password={{ db_root_password }} state=present priv=*.*:ALL,GRANT host={{ item }} login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  ignore_errors: yes
+  with_items:
+    - "{{ ansible_hostname }}"
+    - "{{ inventory_hostname }}"
+    - 127.0.0.1
+    - ::1
   notify:
     - restart mysql
 
@@ -56,7 +73,7 @@
 
 - name: MariaDB - Remove distant user
   mysql_user: name={{ mariadb.user }} host={{ item }} state=absent login_user={{ mariadb.root }} login_password={{ db_root_password }}
-  with_items: "{{ groups['web'] + ['localhost'] }}"
+  with_items: "{{ groups['web'] + ['localhost'] + ['127.0.0.1'] + [ansible_hostname] + [inventory_hostname] + ['::1'] }}"
   notify:
     - restart mysql
 
@@ -79,11 +96,12 @@
     - restart mysql
 
 - name: MariaDB - Grant distant user local permissions
-  mysql_user: name={{ mariadb.user }} password={{ db_user_password }} state=present priv={{ item.1 + "%.*:INSERT,SELECT,UPDATE,DELETE"}} host=localhost login_user={{ mariadb.root }} login_password={{ db_root_password }}
+  mysql_user: name={{ mariadb.user }} password={{ db_user_password }} state=present priv={{ item.1 + "%.*:INSERT,SELECT,UPDATE,DELETE"}} host={{ item.2 }} login_user={{ mariadb.root }} login_password={{ db_root_password }}
   when: inventory_hostname == item.0
   with_nested:
    - groups['web']
    - applications.sites | map(attribute='dbnames') | list
+   - ['localhost', '127.0.0.1', '{{ ansible_hostname }}', '::1', '{{ inventory_hostname }}']
   notify:
     - restart mysql
 
