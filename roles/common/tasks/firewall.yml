@@ -5,6 +5,11 @@
 - name: Firewall - Install ferm
   apt: name=ferm state=present
 
+# Needed for ferm to work if domain names are used instead of IPs
+- name: Firewall - Set main domain name in hosts
+  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Project\s*{{ item.0 }}\s*$" line="127.0.0.1    {{ item.1.url }} {{ '#' }} Project {{ item.0 }}"
+  with_indexed_items: applications.sites
+
 - name: Firewall - Copy configuration template (ferm)
   template: src=etc/ferm/ferm.conf.j2 dest=/etc/ferm/ferm.conf mode=0644 owner=root group=root backup=yes
   notify:
