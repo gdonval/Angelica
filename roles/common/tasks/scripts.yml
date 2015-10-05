@@ -25,7 +25,36 @@
   notify:
     - restart cron
 
-- name: Scripts - Copy other scripts
+- name: Scripts - Copy general scripts
   copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
   with_fileglob:
     - "../../../files/scripts/*.sh"
+
+- name: Scripts - Copy environment scripts
+  copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
+  with_fileglob:
+    - "../../../files/scripts/{{ env }}/*.sh"
+
+- name: Scripts - Copy backup environment scripts
+  copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
+  with_fileglob:
+    - "../../../files/scripts/{{ env }}/backup/*.sh"
+  when: inventory_hostname in groups['backup']
+
+- name: Scripts - Copy smtp environment scripts
+  copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
+  with_fileglob:
+    - "../../../files/scripts/{{ env }}/smtp/*.sh"
+  when: inventory_hostname in groups['smtp']
+
+- name: Scripts - Copy web environment scripts
+  copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
+  with_fileglob:
+    - "../../../files/scripts/{{ env }}/web/*.sh"
+  when: inventory_hostname in groups['web']
+
+- name: Scripts - Copy db environment scripts
+  copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
+  with_fileglob:
+    - "../../../files/scripts/{{ env }}/db/*.sh"
+  when: inventory_hostname in groups['db']/*.sh"
