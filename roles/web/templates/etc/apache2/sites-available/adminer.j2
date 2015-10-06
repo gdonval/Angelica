@@ -15,22 +15,24 @@
     SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
     SSLHonorCipherOrder on
     SSLCompression off
-    Header add Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
     AddType application/x-x509-ca-cert      .crt
     AddType application/x-pkcs7-crl         .crl
     {% endif %}
 
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
     Header set Content-Security-Policy "default-src 'self' 'unsafe-inline'; img-src data: 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
 
     ServerAdmin {{ adminer.email }}
-    DocumentRoot "{{ adminer.path }}"
+    DocumentRoot "{{ adminer.path }}adminer/"
 
     ServerName {{ mariadb.domain }}
     ServerAlias {{ adminer.alias }}
 
     ErrorLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.error.log
     CustomLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.access.log common
+
+    Alias /adminer {{ adminer.path }}adminer/
 
     <Directory "{{ adminer.path }}">
         Options -Indexes +FollowSymLinks +Includes

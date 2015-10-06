@@ -18,14 +18,14 @@
   when: apache.enabled
 
 - name: Adminer - Install a decent style for adminer
-  copy: src=usr/share/adminer/adminer.css dest={{ adminer.path }}
+  copy: src=usr/share/adminer/adminer.css dest={{ adminer.path }}adminer/
 
 - name: Adminer - Limit adminer to PDO if using SSL
-  template: src=usr/share/adminer/adminer/drivers/mysql.inc.php.j2 dest=/usr/share/adminer/adminer/drivers/mysql.inc.php mode=0644 owner=root group=root backup=yes
+  template: src=usr/share/adminer/adminer/drivers/mysql.inc.php.j2 dest={{ adminer.path }}adminer/drivers/mysql.inc.php mode=0644 owner=root group=root backup=yes
   when: ssl.enabled and mariadb.ssl
 
 - name: Adminer - Make sure PDO uses SSL
-  template: src=usr/share/adminer/adminer/include/pdo.inc.php.j2 dest=/usr/share/adminer/adminer/include/pdo.inc.php mode=0644 owner=root group=root backup=yes
+  template: src=usr/share/adminer/adminer/include/pdo.inc.php.j2 dest={{ adminer.path }}adminer/include/pdo.inc.php mode=0644 owner=root group=root backup=yes
   when: ssl.enabled and mariadb.ssl
 
 - name: Adminer - Set adminer domain name in hosts
