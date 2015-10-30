@@ -68,3 +68,8 @@
     - /etc/php5/cli/php.ini
     - /etc/php5/apache2/php.ini
   when: smtp.enabled
+
+- name: PHP - Install xdebug PHP configuration for apache
+  lineinfile: dest=/etc/php5/mods-available/xdebug.ini state=present regexp='^\;?\s*{{ item.key }}\s*=\s*' line="{{ item.key }} = {{ item.value }}"
+  with_dict: "{{ php.xdebug.options }}"
+  when: php.xdebug.enabled

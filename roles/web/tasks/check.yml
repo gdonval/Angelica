@@ -94,4 +94,8 @@
   when: "{{ (applications.enabled or adminer.enabled) and ( ( (applications.sites | default({})) + [adminer]) | map(attribute='path') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
   with_items: "{{ ((applications.sites | default([])) + [adminer]) | map(attribute='path') | list }}"
 
+# PHP
 
+- name: Check - xdebug extension must be present if xdebug is enabled
+  fail: msg="xDebug is enabled but will not be installed. Verify that php.extensions contains “xdebug”"
+  when: php.xdebug.enabled and not "xdebug" in php.extensions

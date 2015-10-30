@@ -128,6 +128,11 @@ table filter {
             {% endif %}
 
         {% endif %}
+
+        {% if php.xdebug.enabled %}
+            # Authorize xDebug
+            proto tcp dport {{ php.xdebug.options['xdebug.remote_port'] }} daddr {{ php.xdebug.options['xdebug.remote_host'] }} ACCEPT;
+        {% endif %}
     }
     chain FORWARD {
         policy DROP;
