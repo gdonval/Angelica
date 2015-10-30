@@ -195,7 +195,7 @@ php:
     opcache.max_accelerated_files: 4000 # Maximum number of files handled by opcache
     opcache.revalidate_freq: 60 # How often (in sec) to check file timestamps for changes to the shared memory storage allocation
   xdebug:
-    enabled: On # Enable or disable xdebug - Require php5-xdebug to be installed
+    enabled: Off # Enable or disable xdebug - Require php5-xdebug to be installed
     options:
       xdebug.remote_enable: "off" # Remote xdebug support or not, for example if you’re using a virtual machine
       xdebug.remote_handler: dbgp
