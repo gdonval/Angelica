@@ -2,7 +2,7 @@
 
 # This is the local env specific configuration file
 # Feel free to change options
-# It overrides vars/all, vars/db, vars/web, vars/backup and vars/smtp
+# It overrides vars/all, vars/db, vars/web, vars/backup and vars/mail
 
 precedence:
   20: local

@@ -6,7 +6,7 @@ X.X.X.X
 [stage_db]
 X.X.X.X
 
-[stage_smtp]
+[stage_mail]
 X.X.X.X
 
 [stage_backup]
@@ -23,8 +23,8 @@ stage_web
 [db:children]
 stage_db
 
-[smtp:children]
-stage_smtp
+[mail:children]
+stage_mail
 
 [backup:children]
 stage_backup
@@ -35,8 +35,8 @@ server_web=web
 [db:vars]
 server_db=db
 
-[smtp:vars]
-server_smtp=smtp
+[mail:vars]
+server_mail=mail
 
 [backup:vars]
 server_backup=backup
@@ -44,7 +44,7 @@ server_backup=backup
 [stage:children]
 stage_web
 stage_db
-stage_smtp
+stage_mail
 stage_backup
 
 [stage:vars]

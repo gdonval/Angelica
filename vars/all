@@ -7,7 +7,7 @@
 # This is the global configuration file with ALL options, for every kind of server
 # THESE ARE DEFAULT OPTIONS
 # You can override options in specific vars files
-# Edit server purpose config files (./web, ./db, ./smtp, ./backup), or environment config files (./local, ./stage, ./prod)
+# Edit server purpose config files (./web, ./db, ./mail, ./backup), or environment config files (./local, ./stage, ./prod)
 
 precedence:
   0: all
@@ -133,9 +133,9 @@ firewall:
 # SMTP #
 ########
 smtp:
-  enabled: True # Enable postfix - SMTP server
-  port: 465
-  host: 127.0.0.1
+  enabled: True # Enable communication with SMTP server
+  port: 465 # SMTP output port to be opened
+  host: 127.0.0.1 # SMTP server host, choose your postfix server if you set up one
 
 
 ########

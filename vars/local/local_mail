@@ -1,8 +1,8 @@
 ---
 
-# This is the db local env specific configuration file
+# This is the mail local env specific configuration file
 # Feel free to change options
 # It overrides vars/all, vars/db, vars/web, vars/backup, vars/mail and vars/local
 
 precedence:
-  32: local_db
+  30: local_mail

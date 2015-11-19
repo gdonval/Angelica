@@ -41,11 +41,11 @@
     - "../../../files/scripts/{{ env }}/backup/*.sh"
   when: inventory_hostname in groups['backup']
 
-- name: Scripts - Copy smtp environment scripts
+- name: Scripts - Copy mail environment scripts
   copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
   with_fileglob:
-    - "../../../files/scripts/{{ env }}/smtp/*.sh"
-  when: inventory_hostname in groups['smtp']
+    - "../../../files/scripts/{{ env }}/mail/*.sh"
+  when: inventory_hostname in groups['mail']
 
 - name: Scripts - Copy web environment scripts
   copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}

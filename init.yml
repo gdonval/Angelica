@@ -25,12 +25,12 @@
       debug: var=precedence
   vars_files:
     - vars/all
-    - [ "vars/type/{{ server_smtp }}", "vars/null" ]
+    - [ "vars/type/{{ server_mail }}", "vars/null" ]
     - [ "vars/type/{{ server_backup }}", "vars/null" ]
     - [ "vars/type/{{ server_db }}", "vars/null" ]
     - [ "vars/type/{{ server_web }}", "vars/null" ]
     - [ "vars/{{ env }}/{{ env }}", "vars/null" ]
-    - [ "vars/{{ env }}/{{ env }}_{{ server_smtp }}", "vars/null" ]
+    - [ "vars/{{ env }}/{{ env }}_{{ server_mail }}", "vars/null" ]
     - [ "vars/{{ env }}/{{ env }}_{{ server_backup }}", "vars/null" ]
     - [ "vars/{{ env }}/{{ env }}_{{ server_db }}", "vars/null" ]
     - [ "vars/{{ env }}/{{ env }}_{{ server_web }}", "vars/null" ]

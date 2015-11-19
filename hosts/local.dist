@@ -6,7 +6,7 @@ X.X.X.X
 [local_db]
 X.X.X.X
 
-[local_smtp]
+[local_mail]
 X.X.X.X
 
 [local_backup]
@@ -23,8 +23,8 @@ local_web
 [db:children]
 local_db
 
-[smtp:children]
-local_smtp
+[mail:children]
+local_mail
 
 [backup:children]
 local_backup
@@ -35,8 +35,8 @@ server_web=web
 [db:vars]
 server_db=db
 
-[smtp:vars]
-server_smtp=smtp
+[mail:vars]
+server_mail=mail
 
 [backup:vars]
 server_backup=backup
@@ -44,7 +44,7 @@ server_backup=backup
 [local:children]
 local_web
 local_db
-local_smtp
+local_mail
 local_backup
 
 [local:vars]

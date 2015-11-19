@@ -1,8 +1,0 @@
----
-
-# This is the smtp local env specific configuration file
-# Feel free to change options
-# It overrides vars/all, vars/db, vars/web, vars/backup, vars/smtp and vars/local
-
-precedence:
-  30: local_smtp

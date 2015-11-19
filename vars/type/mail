@@ -1,8 +1,8 @@
 ---
 
-# This is the smtp specific configuration file
+# This is the mail specific configuration file
 # Feel free to change options
 # It overrides vars/all
 
 precedence:
-  10: smtp
+  10: mail
