@@ -318,3 +318,35 @@ mariadb:
     innodb_buffer_pool_instances: 2 # default: 1 - Advice: Share RAM in multiple instances
     collation_server: utf8_general_ci
     character_set_server: utf8
+
+
+###########
+# Postfix #
+###########
+postfix:
+  enabled: True # Install postfix
+  tls: encrypt # Enable or not TLS support (should be “encypt”, “may” or “none”, @see http://www.postfix.org/postconf.5.html#smtpd_tls_security_level)
+  autosigned: True # Determine wether use an autosigned certificate or not
+  hostname: mail.project.com # Postfix hostname
+  domain: project.com # Domain where postfix is installed, typically the top domain of the hostname
+  path: /var/email # Path for emails
+  group: email # Postifx group and username
+  interface: 127.0.0.1 # Which interface should postfix listen to
+  networks: # Which networks are trusted to use postfix (ex: 10.0.0.0/16)
+    - 127.0.0.1
+  vmail:
+    domains: # Domain served by postfix
+      - project.com
+    mailboxes: # Mailbox to use {user: X, domain: Y, pass: Z}
+      -
+        user: admin
+        domain: project.net
+        pass: pass
+    aliases:
+      -
+
+###########
+# Dovecot #
+###########
+dovecot:
+  enabled: False # Install dovecot - needed for postfix SASL authentication !

@@ -1,0 +1,9 @@
+---
+- name: Postfix - Create group email
+  group: name={{ postfix.group }} state=present system=yes gid=7788
+
+- name: Postfix - Create email user
+  user: name={{ postfix.group }} state=present group={{ postfix.group }} home={{ postfix.path }} generate_ssh_key=no system=yes createhome=yes uid=7788
+
+- name: Postfix - Create email directory
+  file: path={{ postfix.path }} owner=root group={{ postfix.group }} state=directory mode=775

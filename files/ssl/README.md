@@ -13,10 +13,13 @@ Each files must be named after the `application.sites.short_name` ([see `vars`](
 
 - `certs` extension must be .crt (e.g. *my_project.crt*)
 - `private` extension must be .key (e.g. *my_project.crt*)
-- `certs` extension must be .cabundle (e.g. *my_project.crt*)
+- `ca` extension must be .cabundle (e.g. *my_project.crt*)
 
-Each user inside the `ssh.group` must have its own key.
-Keys must be named after your users configured in the `users`.
+For postfix, named your files as followed:
+
+- `certs` extension must be postfix.crt
+- `private` extension must be postfix.key
+- `ca` extension must be postfix.cabundle
 
 Note that *.dist* files are ignored. These are model files.
 

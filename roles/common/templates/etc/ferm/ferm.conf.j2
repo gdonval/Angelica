@@ -96,7 +96,7 @@ table filter {
             proto tcp dport 9418 ACCEPT;
         {% endif %}
 
-        {% if smtp.enabled %}
+        {% if smtp.enabled or postfix.enabled %}
             # Authorize SMTP
             proto tcp dport {{ smtp.port }} daddr {{ smtp.host }} ACCEPT;
         {% endif %}

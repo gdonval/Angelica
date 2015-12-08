@@ -1,0 +1,76 @@
+---
+- name: Postfix - Install Postfix | upgrade servers
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Postfix - Install Postfix
+  apt: name=postfix state=present update_cache=true
+  tags:
+    - packages
+
+- name: Postfix - Install Sasl
+  apt: name={{ item }} state=present update_cache=true
+  with_items:
+    - libsasl2-2
+    - libsasl2-modules
+    - sasl2-bin
+  tags:
+    - packages
+
+- name: Postfix - Set main domain name in hosts
+  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Postfix\s*$" line="127.0.0.1  {{ postfix.hostname }} {{ '#' }} Postfix"
+
+- name: Postfix - Install new postfix main configuration file
+  template: src=etc/postfix/main.cf.j2 dest=/etc/postfix/main.cf mode=0644 owner=root group=root backup=yes
+  notify:
+    - restart saslauthd
+
+- name: Postfix - Install SMTP main configuration file
+  template: src=etc/postfix/sasl/smtpd.conf.j2 dest=/etc/postfix/sasl/smtpd.conf mode=0644 owner=root group=root
+  notify:
+    - restart saslauthd
+
+- name: Postfix - Set postfix master configuration file
+  lineinfile: dest=/etc/postfix/master.cf state=present regexp='{{ item.regex }}' line='{{ item.value }}'
+  with_items:
+    - {regex: '^\#?\s*submission\s*inet\s*n', value: 'submission inet n       -       -       -       -       smtpd'}
+    - {regex: '^\#?\s*-o\s*smtpd_tls_security_level', value: '  -o smtpd_tls_security_level={{ postfix.tls }}'}
+    - {regex: '^\#?\s*-o\s*smtpd_sasl_auth_enable', value: '  -o smtpd_sasl_auth_enable={{ dovecot.enabled }}'}
+    - {regex: '^\#?\s*-o\s*smtpd_client_restrictions', value: '  -o smtpd_client_restrictions=permit_sasl_authenticated,reject'}
+    - {regex: '^\#?\s*-o\s*milter_macro_daemon_name', value: '  -o milter_macro_daemon_name=ORIGINATING'}
+
+- name: Postfix - Start sasl on startup
+  lineinfile: dest=/etc/default/saslauthd state=present regexp='^\#?\s*START\s*=' line='START=yes'
+  notify:
+    - restart saslauthd
+    - restart postfix
+
+- name: Postfix - Create mailbox file
+  file: path=/etc/postfix/vmail_mailbox owner=root group={{ postfix.group }} state=touch mode=660 force=yes
+
+- name: Postfix - Create vmail domains file
+  file: path=/etc/postfix/vmail_domains owner=root group={{ postfix.group }} state=touch mode=660 force=yes
+
+- name: Postfix - Create vmail alias file
+  file: path=/etc/postfix/vmail_aliases owner=root group={{ postfix.group }} state=touch mode=660 force=yes
+
+- name: Postfix - Create vmail domains db file
+  command: postmap /etc/postfix/vmail_domains
+
+- name: Postfix - Create vmail mailbox db file
+  command: postmap /etc/postfix/vmail_mailbox
+
+- name: Postfix - Create vmail alias db file
+  command: postmap /etc/postfix/vmail_aliases
+
+- name: Postfix - Set postfix mailboxes
+  lineinfile: dest=/etc/postfix/vmail_mailbox state=present line='{{ item.user }}@{{ item.domain }} {{ item.domain }}/{{ item.user }}'
+  with_items: postfix.vmail.mailboxes
+  notify:
+    - restart saslauthd
+    - restart postfix
+
+- name: Postfix - Set postfix domains
+  lineinfile: dest=/etc/postfix/vmail_domains state=present line='{{ postfix.domain }}  OK'
+  notify:
+    - restart saslauthd
+    - restart postfix

@@ -1,0 +1,45 @@
+---
+# SSL
+- name: Check - TLS variable
+  fail: msg="The postfix.tls value should be “encrypt”, “may” or “none” (“{{ postfix.tls }}” given)."
+  when: postfix.tls != "encrypt" and postfix.tls != "may" and postfix.tls != "none"
+
+- name: Check - TLS is enabled if postfix.tls is encrypt or may
+  fail: msg="The postfix.tls value is “{{ postfix.tls }}” whereas TLS is disable. Verify that tls.enabled = True."
+  when: (postfix.tls == "encrypt" or postfix.tls == "may") and not ssl.enabled
+
+- stat: path="files/ssl/private/postfix.key"
+  register: privates
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: ssl.enabled and not postfix.autosigned and postfix.tls != 'none'
+
+- stat: path="files/ssl/ca/{{ item.short_name }}.cabundle"
+  register: cas
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: ssl.enabled and not postfix.autosigned and postfix.tls != 'none'
+
+- stat: path="files/ssl/certs/{{ item.short_name }}.crt"
+  register: certs
+  delegate_to: 127.0.0.1
+  sudo: no
+  when: ssl.enabled and not postfix.autosigned and postfix.tls != 'none'
+
+- name: Check - If SSL is enabled, and autosigned disabled, the certs private keys are present
+  fail: msg="A private key is lacking for postfix. Please add the private key “files/ssl/private/postfix.key”. Or, you can disable SSL or enabled autosign certs for postfix."
+  when: item.stat is defined and not item.stat.exists
+  with_items:
+    - "{{ privates.results }}"
+
+- name: Check - If SSL is enabled, and autosigned disabled, the certs are present
+  fail: msg="A certificate is lacking for postfix. Please add the certificate “files/ssl/certs/postfix.crt”. Or, you can disable SSL or enabled autosign certs for postfix."
+  when: item.stat is defined and not item.stat.exists
+  with_items:
+    - "{{ certs.results }}"
+
+- name: Check - If SSL is enabled, and autosigned disabled, the ca certs are present
+  fail: msg="A ca certificate is lacking for postfix. Please add the ca certificate “files/ssl/ca/postfix.cabundle”. Or, you can disable SSL or enabled autosign certs for postfix."
+  when: item.stat is defined and not item.stat.exists
+  with_items:
+    - "{{ cas.results }}"

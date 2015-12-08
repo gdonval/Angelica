@@ -1,0 +1,92 @@
+# Your hostname and domain name here
+myhostname = {{ postfix.hostname }}
+mydomain = {{ postfix.domain }}
+myorigin = $mydomain
+smtpd_banner = $myhostname ESMTP $mail_name
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+mydestination = $myhostname, {{ postfix.domain }}, localhost.localdomain, localhost
+mynetworks = {{ postfix.networks | default({}) | join(', ') }}
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = {{ postfix.interface }}
+inet_protocols = ipv4
+queue_directory = /var/spool/postfix
+tls_random_source = dev:/dev/urandom
+tls_preempt_cipherlist = yes
+
+# Virtual mailbox configuration
+virtual_mailbox_base = {{ postfix.path }}
+virtual_mailbox_domains = hash:/etc/postfix/vmail_domains
+virtual_mailbox_maps = hash:/etc/postfix/vmail_mailbox
+virtual_alias_maps = hash:/etc/postfix/vmail_aliases
+virtual_minimum_uid = 100
+virtual_uid_maps = static:7788
+virtual_gid_maps = static:7788
+virtual_transport = {% if dovecot.enabled %}dovecot{% else %}virtual{% endif %}
+
+
+# SMTPD configuration
+smtpd_use_tls = {% if postfix.tls == 'none' %}no{% else %}yes{% endif %}
+
+smtpd_tls_cert_file = /etc/ssl/certs/autosigned.postfix.crt
+smtpd_tls_key_file = /etc/ssl/private/autosigned.postfix.key
+smtpd_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+smtpd_tls_security_level = {{ postfix.tls }}
+smtpd_tls_mandatory_ciphers = high
+smtpd_tls_protocols = !SSLv2, !SSLv3
+smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3
+smtpd_tls_mandatory_exclude_ciphers= aNULL, eNULL, MD5, EXP, ADH, IDEA, KRB5, RC2, SEED, RC4, PSD, SRP, 3DES, EXPORT, LOW, DES
+smtpd_tls_exclude_ciphers= aNULL, eNULL, MD5, EXP, ADH, IDEA, KRB5, RC2, SEED, RC4, PSD, SRP, 3DES, EXPORT, LOW, DES
+smtpd_tls_auth_only = yes
+smtpd_tls_loglevel = 1
+smtpd_tls_received_header = yes
+smtpd_tls_session_cache_timeout = 3600s
+smtpd_tls_dh1024_param_file = /etc/ssl/private/postfix.dh
+smtpd_tls_eecdh_grade = strong
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+smtpd_client_restrictions = reject_rbl_client dnsbl.sorbs.net
+smtpd_recipient_restrictions = reject_invalid_hostname, reject_unknown_recipient_domain, reject_unauth_destination, reject_rbl_client sbl.spamhaus.org, permit_sasl_authenticated, permit_mynetworks, check_relay_domains
+smtpd_helo_restrictions = reject_invalid_helo_hostname, reject_non_fqdn_helo_hostname, reject_unknown_helo_hostname
+smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
+
+smtp_use_tls = {% if postfix.tls == 'none' %}no{% else %}yes{% endif %}
+
+smtp_tls_security_level = {{ postfix.tls }}
+smtp_tls_note_starttls_offer = yes
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+smtp_tls_mandatory_ciphers = high
+smtp_tls_fingerprint_digest = sha256
+smtp_tls_protocols = !SSLv2, !SSLv3
+smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
+smtp_tls_mandatory_exclude_ciphers= aNULL, eNULL, MD5, EXP, ADH, IDEA, KRB5, RC2, SEED, RC4, PSD, SRP, 3DES, EXPORT, LOW, DES
+smtp_tls_exclude_ciphers= aNULL, eNULL, MD5, EXP, ADH, IDEA, KRB5, RC2, SEED, RC4, PSD, SRP, 3DES, EXPORT, LOW, DES
+smtp_tls_loglevel = 1
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+# Authentication settings, making use of SASL
+{% if dovecot.enabled %}
+smtp_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+broken_sasl_auth_clients = yes
+smtpd_sasl_security_options = forward_secrecy, noanonymous
+smtpd_sasl_tls_security_options = $smtpd_sasl_security_options
+smtpd_sasl_local_domain = $myhostname
+smtpd_sasl_application_name = smtpd
+smtpd_helo_required = yes
+smtpd_helo_restrictions = reject_invalid_helo_hostname
+smtpd_recipient_restrictions = reject_unknown_recipient_domain, reject_unauth_pipelining, permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+{% else %}
+smtp_sasl_auth_enable = no
+{% endif %}
+
+# Limit DOS
+default_process_limit = 100
+smtpd_client_connection_count_limit = 10
+smtpd_client_connection_rate_limit = 30
+queue_minfree = 20971520
+header_size_limit = 51200
+message_size_limit = 10485760
+smtpd_recipient_limit = 10

@@ -1,0 +1,12 @@
+---
+- include: check.yml tags=always
+
+- include: users.yml tags=users
+  when: postfix.enabled or dovecot.enabled
+
+- include: ssl.yml tags=ssl
+  when: ssl.enabled
+
+- include: postfix.yml tags=postfix
+  when: postfix.enabled
+
