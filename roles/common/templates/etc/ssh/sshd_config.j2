@@ -30,26 +30,16 @@ UsePAM no
 IgnoreRhosts yes
 StrictModes yes
 
-# Only authorized users can connect
-AllowGroups {{ ssh.group }}
-
 # Pubkey authentication only
 PubkeyAuthentication yes
 AuthorizedKeysFile %h/.ssh/authorized_keys
 
 # Connection times
 LoginGraceTime 30
-{% if env == 'prod' %}
 ClientAliveInterval 300
-ClientAliveCountMax 0
-{% else %}
-ClientAliveInterval 3000
-{% endif %}
-
 ClientAliveCountMax 0
 
 # No X11 forwarding
 X11Forwarding no
 
-# SFTP authorization
-Subsystem sftp {{ ssh.sftp.path }}
+# Other

@@ -14,6 +14,14 @@ backup:
   enabled: False
 
 
+#######
+# SSH #
+#######
+ssh:
+  options:
+    ClientAliveInterval: 3000 # Time to live for the SSH connection
+
+
 ##########
 # Smartd #
 ##########

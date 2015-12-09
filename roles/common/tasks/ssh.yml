@@ -35,3 +35,9 @@
   lineinfile: dest=/etc/ssh/ssh_config regexp="^#?\s*Port\s*" line="Port {{ ssh.port }}" backup=yes owner=root group=root mode=0644
   notify:
     - restart ssh
+
+- name: SSH - Install other SSH configuration
+  lineinfile: dest=/etc/ssh/sshd_config state=present regexp='^\#?\s*{{ item.key }}\s*=\s*' line="{{ item.key }} {{ item.value }}"
+  with_dict: "{{ ssh.options }}"
+  notify:
+    - restart ssh
