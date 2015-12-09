@@ -11,3 +11,6 @@ precedence: stage
 php:
   options:
     opcache.revalidate_freq: 600
+    display_errors: 'Off'
+    display_startup_errors: 'Off'
+    memory_limit: 64M # Memory limit per PHP user

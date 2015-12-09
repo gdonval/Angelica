@@ -173,17 +173,19 @@ php:
     max_execution_time: 60 # Max execution time for a PHP request
     memory_limit: 128M # Memory limit per PHP user
     error_reporting: E_ALL # Type of error to report
-    display_startup_errors: On # Display PHP startup errors
-    log_errors: On # Enable log of errors
+    display_startup_errors: 'On' # Display PHP startup errors
+    display_errors: 'Off' # Whether display error in the output or not
+    log_errors: 'On' # Enable log of errors
     log_errors_max_len: 2048 # Maxum log file length in kB
     error_log: "/var/log/php/error.log" # Path to PHP error logs
     post_max_size: 2M # Maximum size for a POST request
-    file_uploads: On # Allow uploads by users
+    file_uploads: 'On' # Allow uploads by users
+    upload_tmp_dir: \"/var/lib/php5/tmp/\" # Temporary directory for uploads
     upload_max_filesize: 2M # Maximum filesize for an upload by a user
     date.timezone: "Europe/Paris" # Timezone of the server
     pdo_mysql.cache_size: 2000 # Cache size for pdo_mysql
     session.save_path: \"/var/lib/php5/sessions/\" # Session save path
-    session.name: PHPSESSID # Session name
+    session.name: angSess # Session name
     session.cookie_httponly: 1 # Whether or not to add the httpOnly flag to the cookie
     session.gc_probability: 0 # Defines the probability that the 'garbage collection' process is started on every session initialization.
     session.gc_maxlifetime: 172800 # Session maximum lifetime
@@ -194,6 +196,13 @@ php:
     opcache.memory_consumption: 192 # Opcache memory consumption
     opcache.max_accelerated_files: 4000 # Maximum number of files handled by opcache
     opcache.revalidate_freq: 60 # How often (in sec) to check file timestamps for changes to the shared memory storage allocation
+    expose_php: 'Off' # Expose PHP or not. Keep it off
+    allow_url_fopen: 'Off' # Allow URL open function or not
+    allow_url_include: 'Off' # Allow URL open function or not
+    max_input_time: 30 # Amount of time in second allowed to parse requests (POST or GET...)
+    max_input_nesting_level: 4 # Maximum nesting for requests (POST, GET...)
+    open_basedir: '/var/www/,/var/lib/php5/tmp/,/var/lib/php5/sessions/'
+    disable_functions: 'exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source,ini_set,pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority'
   xdebug:
     enabled: Off # Enable or disable xdebug - Require php5-xdebug to be installed
     options:
