@@ -10,21 +10,21 @@
     - openssl-blacklist-extra
 
 - name: SSL - Copy applications private keys
-  copy: src=files/ssl/private/{{ item.short_name }}.key dest=/etc/ssl/private/{{ item.short_name }}.key mode=0640 owner=root group=ssl-cert
+  copy: src=files/ssl/private/{{ item.short_name }}.key dest=/etc/ssl/private/{{ item.short_name }}.key mode=0640 owner=root group=www-data
   when: item.url is defined and (applications.enabled or adminer.enabled) and not item.autosigned
   with_flattened:
     - applications.sites | default({})
     - "{{ [adminer] }}"
 
 - name: SSL - Copy Ca certificates
-  copy: src=files/ssl/ca/{{ item.short_name }}.cabundle dest=/etc/ssl/certs/{{ item.short_name }}.cabundle mode=0644 owner=root group=ssl-cert
+  copy: src=files/ssl/ca/{{ item.short_name }}.cabundle dest=/etc/ssl/certs/{{ item.short_name }}.cabundle mode=0644 owner=root group=www-data
   when: item.url is defined and (applications.enabled or adminer.enabled) and not item.autosigned
   with_flattened:
     - applications.sites | default({})
     - "{{ [adminer] }}"
 
 - name: SSL - Copy application certificates
-  copy: src=files/ssl/certs/{{ item.short_name }}.crt dest=/etc/ssl/certs/{{ item.short_name }}.crt mode=0644 owner=root group=ssl-cert
+  copy: src=files/ssl/certs/{{ item.short_name }}.crt dest=/etc/ssl/certs/{{ item.short_name }}.crt mode=0644 owner=root group=www-data
   when: item.url is defined and (applications.enabled or adminer.enabled) and not item.autosigned
   with_flattened:
     - applications.sites | default({})
@@ -40,7 +40,7 @@
     - renew
 
 - name: SSL - Protect autosigned private key
-  file: path=/etc/ssl/private/autosigned.{{ item.short_name }}.key owner=root group=ssl-cert mode=0640
+  file: path=/etc/ssl/private/autosigned.{{ item.short_name }}.key owner=root group=www-data mode=0640
   when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
   with_flattened:
     - applications.sites | default({})
@@ -49,14 +49,10 @@
     - renew
 
 - name: SSL - Set permission for autosigned public key
-  file: path=/etc/ssl/certs/autosigned.{{ item.short_name }}.crt owner=root group=root mode=0777
+  file: path=/etc/ssl/certs/autosigned.{{ item.short_name }}.crt owner=root group=www-data mode=0644
   when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
   with_flattened:
     - applications.sites | default({})
     - "{{ [adminer] }}"
   tags:
     - renew
-
-- name: SSL - Add web server user user to the ssl group
-  user: name=www-data state=present groups=ssl-cert
-  when: apache.enabled or nginx.enabled
