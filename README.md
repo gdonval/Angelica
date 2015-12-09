@@ -33,7 +33,7 @@ At least three environments are needed. It can be on a single machine or a infin
 
 - Copy all the users SSH keys in `files/sshkeys`. Your (the deployer) key is a minimum. (the host):
 
-- Install [Debian Jessie](https://www.debian.org/distrib/) on the application server(s). Choose a root password (strong please, at least 16 chars). **It must be the same for all servers** (the application servers).
+- Install [Debian Jessie](https://www.debian.org/distrib/) on the application server(s). Choose a root password (strong please, at least 16 chars). **It must be the same for all servers**, you can change it afterwards. (the application servers).
 
 - Verify that `python` and `ssh` are installed (the application servers):
 
@@ -68,11 +68,11 @@ That’s it. Your servers are ready.
 
 - In a local environment, you’ll need to share your project between you guest and your host, to edit the code with your IDE. Three options are possible:
 
-##### Sharing with VirtualBox - can harm performance really badly #####
+##### Sharing with a virtual machine - can harm performance really badly #####
 
 - First, don’t forget to add `applications.download: False` in the right configuration file;
 
-- In your virtual machine, edit the file `/etc/rc.local` and add the following line (replace **33** by your guest apache user id and apache group id):
+- In your virtual machine, edit the file `/etc/rc.local` and add the following line (replace **33** by your guest apache user id and apache group id). Exemple with VirtualBox:
 
         $ sudo mount.vboxsf -o umask=000,gid=33,uid=33 *Project_name* *Project_path*
 
@@ -88,12 +88,12 @@ That’s it. Your servers are ready.
 
 - Install sshfs on both the host and the guest;
 
-- Copy your vrtual machine user public key on your host **~/.ssh/authorized_keys** file;
+- Copy your virtual machine user public key on your host **~/.ssh/authorized_keys** file;
 
         $ ssh-keygen -b 4096 -t rsa -C "your_email@example.com"
         $ cat ~/.ssh/id_rsa.pub
 
-- In your virtual machine, edit the file `/etc/rc.local` and add the following line (replace **33** by your guest apache user id and apache group id):
+- In your virtual machine, edit the file `/etc/rc.local` (or add a **systemd** rule) and add the following line (replace **33** by your guest apache user id and apache group id):
 
         $ sudo -u **your_user** sshfs -o allow_other,gid=33,uid=33 **your_host_user**@**your_host_ip**:**your_host_project_directory** **your_vm_project_directory** -p **your_host_ssh_port**
 
@@ -101,7 +101,7 @@ That’s it. Your servers are ready.
 
         # fusermount -u **your_vm_project_directory**
 
-- You might need a few other tweaks to make sshfs works properly (permissions, conf, ...). Watch the error messages.
+- You might need a few other tweaks to make sshfs works properly (permissions, conf, …). Watch the error messages.
 
 ### Misc ###
 
@@ -146,6 +146,10 @@ The solution is to use ansible vault.
 ##### Ansible & security #####
 
 Do not run ansible on an untrusted computer. When running this script, be sure to be the only user logged in the ansible machine. Otherwise, unauthorized user might be able to steal protected password and private keys when ansible is running.
+
+##### Manage self-signed certificates and keys #####
+
+It’s very likely you’ll have self-signed certificates in your ansible configuration. By defaulf, ansible will always regenerate such keys when you run it multiple times. It’s usually not an issue, but if you want to keep all your self-signed keys when running your ansible script again, use the `--skip-tags "renew"` option.
 
 ##### More documentation #####
 

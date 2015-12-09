@@ -4,27 +4,43 @@
 
 - name: SSH - Remove RSA private key
   file: state=absent path=/etc/ssh/ssh_host_rsa_key
+  tags:
+    - renew
 
 - name: SSH - Remove RSA private key
   file: state=absent path=/etc/ssh/ssh_host_rsa_key.pub
+  tags:
+    - renew
 
 - name: SSH - Remove ECDSA private key
   file: state=absent path=/etc/ssh/ssh_host_ecdsa_key
+  tags:
+    - renew
 
 - name: SSH - Remove ECDSA public key
   file: state=absent path=/etc/ssh/ssh_host_ecdsa_key.pub
+  tags:
+    - renew
 
 - name: SSH - Remove DSA private key
   file: state=absent path=/etc/ssh/ssh_host_dsa_key
+  tags:
+    - renew
 
 - name: SSH - Remove DSA public key
   file: state=absent path=/etc/ssh/ssh_host_dsa_key.pub
+  tags:
+    - renew
 
 - name: SSH - Regenerate server RSA key
   command: ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa -b 4096 creates=/etc/ssh/ssh_host_rsa_key
+  tags:
+    - renew
 
 - name: SSH - Regenerate server ECDSA key
   command: ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N '' -t ecdsa -b 521 creates=/etc/ssh/ssh_host_ecdsa_key
+  tags:
+    - renew
 
 - name: SSH - Install sshd configuration file
   template: src=etc/ssh/sshd_config.j2 dest=/etc/ssh/sshd_config owner=root group=root mode=0644 validate='sshd -T -f %s' backup=yes

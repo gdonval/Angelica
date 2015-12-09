@@ -19,52 +19,72 @@
   local_action: file state=directory path=files/ssl/temps mode=777
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create CA certificate key
   local_action: shell openssl genrsa 2048 > ./files/ssl/temps/ca-key.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create CA certificate
   local_action: shell openssl req -new -x509 -nodes -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN=ca.{{ mariadb.domain }}" -days 3600 -key ./files/ssl/temps/ca-key.pem -out ./files/ssl/temps/ca.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create server certificate request
   local_action: shell openssl req -newkey rsa:2048 -days 3600 -nodes -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O=server.{{ ssl.company.name }}/CN={{ mariadb.domain }}" -keyout ./files/ssl/temps/server-key.pem -out ./files/ssl/temps/server-req.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create server certificate key
   local_action: shell openssl rsa -in ./files/ssl/temps/server-key.pem -out ./files/ssl/temps/server-key.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create server certificate
   local_action: shell openssl x509 -req -in ./files/ssl/temps/server-req.pem -days 3600 -CA ./files/ssl/temps/ca.pem -CAkey ./files/ssl/temps/ca-key.pem -set_serial 01 -out ./files/ssl/temps/server-cert.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create client certificate request
   local_action: shell openssl req -newkey rsa:2048 -days 3600 -nodes -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN=client.{{ mariadb.domain }}" -keyout ./files/ssl/temps/client-key.pem -out ./files/ssl/temps/client-req.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create client certificate key
   local_action: shell openssl rsa -in ./files/ssl/temps/client-key.pem -out ./files/ssl/temps/client-key.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Create client certificate
   local_action: shell openssl x509 -req -in ./files/ssl/temps/client-req.pem -days 3600 -CA ./files/ssl/temps/ca.pem -CAkey ./files/ssl/temps/ca-key.pem -set_serial 01 -out ./files/ssl/temps/client-cert.pem
   sudo: no
   run_once: true
+  tags:
+    - renew
 
 - name: SSL - Remove temporary temporary local certificates
   file: state=absent path=files/ssl/temp
   run_once: true
   sudo: no
   delegate_to: 127.0.0.1
+  tags:
+    - renew
 
 - name: SSL - Verify certificates | check
   local_action: shell openssl verify -CAfile ./files/ssl/temps/ca.pem ./files/ssl/temps/server-cert.pem ./files/ssl/temps/client-cert.pem
@@ -84,32 +104,46 @@
   when: inventory_hostname in groups['db']
   notify:
     - restart mysql
+  tags:
+    - renew
 
 - name: SSL - Set MySQL servers certificate
   copy: src=files/ssl/temps/server-cert.pem dest=/etc/ssl/certs/sql-server-cert.pem owner=mysql group=ssl-cert mode=0644 force=yes
   when: inventory_hostname in groups['db']
   notify:
     - restart mysql
+  tags:
+    - renew
 
 - name: SSL - Set MySQL servers private keys
   copy: src=files/ssl/temps/server-key.pem dest=/etc/ssl/private/sql-server-key.pem owner=mysql group=ssl-cert mode=0640 force=yes
   when: inventory_hostname in groups['db']
   notify:
     - restart mysql
+  tags:
+    - renew
 
 - name: SSL - Set MySQL clients CA certificate
   copy: src=files/ssl/temps/ca.pem dest=/etc/ssl/certs/sql-ca.pem owner=mysql group=ssl-cert mode=0644 force=yes
   when: inventory_hostname in groups['web']
+  tags:
+    - renew
 
 - name: SSL - Set MySQL clients certificate
   copy: src=files/ssl/temps/client-cert.pem dest=/etc/ssl/certs/sql-client-cert.pem owner=mysql group=ssl-cert mode=0644 force=yes
   when: inventory_hostname in groups['web']
+  tags:
+    - renew
 
 - name: SSL - Set MySQL clients private keys
   copy: src=files/ssl/temps/client-key.pem dest=/etc/ssl/private/sql-client-key.pem owner=mysql group=ssl-cert mode=0640 force=yes
   when: inventory_hostname in groups['web']
+  tags:
+    - renew
 
 - name: SSL - Remove temporary temporary local certificates
   local_action: file state=absent path=files/ssl/temps
   sudo: no
   run_once: true
+  tags:
+    - renew

@@ -36,6 +36,8 @@
   with_flattened:
     - applications.sites | default({})
     - "{{ [adminer] }}"
+  tags:
+    - renew
 
 - name: SSL - Protect autosigned private key
   file: path=/etc/ssl/private/autosigned.{{ item.short_name }}.key owner=root group=ssl-cert mode=0640
@@ -43,6 +45,8 @@
   with_flattened:
     - applications.sites | default({})
     - "{{ [adminer] }}"
+  tags:
+    - renew
 
 - name: SSL - Set permission for autosigned public key
   file: path=/etc/ssl/certs/autosigned.{{ item.short_name }}.crt owner=root group=root mode=0777
@@ -50,6 +54,8 @@
   with_flattened:
     - applications.sites | default({})
     - "{{ [adminer] }}"
+  tags:
+    - renew
 
 - name: SSL - Add web server user user to the ssl group
   user: name=www-data state=present groups=ssl-cert
