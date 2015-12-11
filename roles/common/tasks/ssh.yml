@@ -53,7 +53,7 @@
     - restart ssh
 
 - name: SSH - Install other SSH configuration
-  lineinfile: dest=/etc/ssh/sshd_config state=present regexp='^\#?\s*{{ item.key }}\s*=\s*' line="{{ item.key }} {{ item.value }}"
+  lineinfile: dest=/etc/ssh/sshd_config state=present regexp='^\#?\s*{{ item.key }}\s' line="{{ item.key }} {{ item.value }}"
   with_dict: "{{ ssh.options }}"
   notify:
     - restart ssh

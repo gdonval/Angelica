@@ -35,28 +35,28 @@ ssh:
   port: 22222 # SSH port
   group: sshenabled # SSH group
   options:
-    Protocol: 2 # Version
-    UsePrivilegeSeparation: yes # Privilege separation
-    SyslogFacility: AUTH # Logging
-    LogLevel: INFO # Log level
-    PrintMotd: no # Whether to print Motd or not
-    PermitRootLogin: no # Enable root login or not
-    RSAAuthentication: no # Enable RSA authentication or not
-    PubkeyAuthentication: yes # Enable asymetric key authentication
-    RhostsRSAAuthentication: no # Enable RhostsRSAAuthentication or not
-    HostbasedAuthentication: no # Enable host based authentication or not
-    PasswordAuthentication: no # Enable password authentication or not
-    ChallengeResponseAuthentication: no # Enable challenge response authentication or not
-    PermitEmptyPasswords: no # Permit empty password connection or not
-    UsePAM: no # Use PAM or not
-    IgnoreRhosts: yes # Ignore Rhost or not
-    StrictModes: yes
-    AuthorizedKeysFile: %h/.ssh/authorized_keys
-    AllowGroups: {{ ssh.group }} # Only users in this group will be authorized to use SSH
-    LoginGraceTime: 30 # How much time SSH will wait for a login to come when connection has been established
-    ClientAliveInterval: 300 # Time to live for the SSH connection
-    ClientAliveCountMax: 0
-    X11Forwarding: no # Enable X forwading to be able to see windows from distant
+    Protocol: '2' # Version
+    UsePrivilegeSeparation: 'yes' # Privilege separation
+    SyslogFacility: 'AUTH' # Logging
+    LogLevel: 'INFO' # Log level
+    PrintMotd: 'no' # Whether to print Motd or not
+    PermitRootLogin: 'no' # Enable root login or not
+    RSAAuthentication: 'no' # Enable RSA authentication or not
+    PubkeyAuthentication: 'yes' # Enable asymetric key authentication
+    RhostsRSAAuthentication: 'no' # Enable RhostsRSAAuthentication or not
+    HostbasedAuthentication: 'no' # Enable host based authentication or not
+    PasswordAuthentication: 'no' # Enable password authentication or not
+    ChallengeResponseAuthentication: 'no' # Enable challenge response authentication or not
+    PermitEmptyPasswords: 'no' # Permit empty password connection or not
+    UsePAM: 'no' # Use PAM or not
+    IgnoreRhosts: 'yes' # Ignore Rhost or not
+    StrictModes: 'yes'
+    AuthorizedKeysFile: '%h/.ssh/authorized_keys'
+    AllowGroups: sshenabled # Only users in this group will be authorized to use SSH
+    LoginGraceTime: '30' # How much time SSH will wait for a login to come when connection has been established
+    ClientAliveInterval: '300' # Time to live for the SSH connection
+    ClientAliveCountMax: '0'
+    X11Forwarding: 'no' # Enable X forwading to be able to see windows from distant
     Subsystem: 'sftp /usr/lib/sftp-server'
 
 
