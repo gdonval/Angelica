@@ -29,9 +29,11 @@ At least three environments are needed. It can be on a single machine or a infin
 
 - [Install necessary packages for ansible](docs.ansible.com/intro_installation.html) (ansible machine).
 
+- Download this project (ansible machine).
+
 - If you don’t have already, [generate your local SSH keys](https://help.github.com/articles/generating-ssh-keys/) (the host):
 
-- Copy all the users SSH keys in `files/sshkeys`. Your (the deployer) key is a minimum. (the host):
+- Copy all the users SSH keys in `files/sshkeys`. Your (the deployer) key is a minimum. (ansible machine):
 
 - Install [Debian Jessie](https://www.debian.org/distrib/) on the application server(s). Choose a root password (strong please, at least 16 chars). **It must be the same for all servers**, you can change it afterwards. (the application servers).
 
@@ -64,9 +66,11 @@ At least three environments are needed. It can be on a single machine or a infin
 
 That’s it. Your servers are ready.
 
+Note: if you want to re-run only a part of a playbook, just add `--tags "your_tag"` to the command. *your_tag* could be a top variable in your configuration file (e.g. *ssh*, *apache*…).
+
 ### Local environment ###
 
-- In a local environment, you’ll need to share your project between you guest and your host, to edit the code with your IDE. Three options are possible:
+- In a local environment, you’ll need to share your project between you guest and your host, to be able to edit your code. Three options are possible:
 
 ##### Sharing with a virtual machine - can harm performance really badly #####
 
@@ -149,7 +153,7 @@ Do not run ansible on an untrusted computer. When running this script, be sure t
 
 ##### Manage self-signed certificates and keys #####
 
-It’s very likely you’ll have self-signed certificates in your ansible configuration. By defaulf, ansible will always regenerate such keys when you run it multiple times. It’s usually not an issue, but if you want to keep all your self-signed keys when running your ansible script again, use the `--skip-tags "renew"` option.
+It’s very likely you’ll have self-signed certificates in your ansible configuration. By default, ansible will always regenerate such keys when you run it multiple times. It’s usually not an issue, but if you want to keep all your self-signed keys when running your ansible script again, use the `--skip-tags "renew"` option.
 
 ##### More documentation #####
 
