@@ -1,3 +1,10 @@
 ---
 - name: Motd - Install dynamic motd
-  template: src=usr/local/bin/dynmotd.j2 dest=/usr/local/bin/dynmotd mode=755 owner=root group=root backup=yes
+  template: src=usr/local/bin/dynmotd.j2 dest=/usr/local/bin/dynmotd mode=755 owner=root group=root
+
+- stat: path=/usr/local/bin/staticmotd
+  register: staticmotd
+
+- name: Motd - Install static banner
+  template: src=usr/local/bin/staticmotd.j2 dest=/usr/local/bin/staticmotd mode=755 owner=root group=root
+  when: staticmotd.stat is defined and not staticmotd.stat.exists
