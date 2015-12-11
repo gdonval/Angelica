@@ -211,7 +211,7 @@ php:
     session.cookie_httponly: 1 # Whether or not to add the httpOnly flag to the cookie
     session.gc_probability: 0 # Defines the probability that the 'garbage collection' process is started on every session initialization.
     session.gc_maxlifetime: 172800 # Session maximum lifetime
-    session.cookie_domain: "" # Cookie domain
+    session.cookie_domain: ".project.com" # Cookie domain
     session.cookie_lifetime: 172800 # Cookie lifetime
     session.hash_function: 1 # Define session hash function (0 = md5 / 1 = sha1)
     opcache.enable: 1 # Determine whether or not enable opcache
@@ -223,8 +223,8 @@ php:
     allow_url_include: 'Off' # Allow URL open function or not
     max_input_time: 30 # Amount of time in second allowed to parse requests (POST or GET...)
     max_input_nesting_level: 4 # Maximum nesting for requests (POST, GET...)
-    open_basedir: '/var/www/,/var/lib/php5/tmp/,/var/lib/php5/sessions/'
-    disable_functions: 'exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source,ini_set,pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority'
+    open_basedir: \"/var/www/:/var/lib/php5/tmp/:/var/lib/php5/sessions/:/usr/bin/php5\"
+    disable_functions: \"exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source,ini_set,pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority\"
   xdebug:
     enabled: Off # Enable or disable xdebug - Require php5-xdebug to be installed
     options:
