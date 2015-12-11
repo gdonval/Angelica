@@ -96,9 +96,16 @@ table filter {
             proto tcp dport 9418 ACCEPT;
         {% endif %}
 
-        {% if smtp.enabled or postfix.enabled %}
+        {% if smtp.enabled %}
             # Authorize SMTP
-            proto tcp dport {{ smtp.port }} daddr {{ smtp.host }} ACCEPT;
+            {% for host in groups['mail'] %}
+                proto tcp dport {{ smtp.port }} daddr {{ host }} ACCEPT;
+            {% endfor %}
+        {% endif %}
+
+        {% if postfix.enabled %}
+            # Authorize SMTP out
+            proto tcp dport {{ smtp.port }} ACCEPT;
         {% endif %}
 
         # Authorize  HTTP & HTTPS - Needed for package manager

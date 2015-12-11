@@ -1,29 +1,51 @@
 ---
-- name: SSL - Create autosigned certificate
-  command: openssl req -nodes -newkey rsa:4096 -x509 -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN={{ postfix.domain }}" -days 3650 -keyout /etc/ssl/private/autosigned.postfix.key -out /etc/ssl/certs/autosigned.postfix.crt
+- name: SSL - Create local postfix CA certificate
+  command: openssl req -nodes -newkey rsa:4096 -x509 -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN={{ ssl.company.domain }}" -days 3650 -keyout /etc/ssl/private/ca.postfix.key -out /etc/ssl/certs/ca.postfix.crt
+  tags:
+    - renew
+
+- name: SSL - Protect local postfix CA private key
+  file: path=/etc/ssl/private/ca.postfix.key owner=root group=root mode=0640
+  tags:
+    - renew
+
+- name: SSL - Set local CA certicate permission for postfix
+  file: path=/etc/ssl/certs/ca.postfix.crt owner=root group={{ postfix.group }} mode=0644
+  tags:
+    - renew
+
+- name: SSL - Create postfix local key
+  command: openssl genrsa -out /etc/ssl/private/autosigned.postfix.key 4096
+  tags:
+    - renew
+
+- name: SSL - Create postfix certificate requests
+  command: openssl req -new -key /etc/ssl/private/autosigned.postfix.key -out /etc/ssl/certs/autosigned.postfix.csr -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN={{ postfix.hostname }}"
+  tags:
+    - renew
+
+- name: SSL - Sign postfix autosigned certificate
+  command: openssl x509 -req -in /etc/ssl/certs/autosigned.postfix.csr -CA /etc/ssl/certs/ca.postfix.crt -CAkey /etc/ssl/private/ca.postfix.key -CAcreateserial -out /etc/ssl/certs/autosigned.postfix.crt -days 3650
+  tags:
+    - renew
+  notify:
+    - restart postfix
+
+- name: SSL - Protect postfix autosigned private key
+  file: path=/etc/ssl/private/autosigned.postfix.key owner=root group={{ postfix.group }} mode=0640
+
+- name: SSL - Set permission for postfix autosigned public key
+  file: path=/etc/ssl/certs/autosigned.postfix.crt owner=root group={{ postfix.group }} mode=0644
+
+- name: SSL - Remove postfix certificate request
+  file: state=absent path=/etc/ssl/certs/autosigned.postfix.csr
   tags:
     - renew
 
 - name: SSL - Create DH configuration
-  command: openssl dhparam -out dhparam.pem 2048
+  command: openssl dhparam -out /etc/ssl/private/postfix.dh 2048
   tags:
     - renew
-
-- name: SSL - Create DH file
-  command: openssl genpkey -paramfile dhparam.pem -out /etc/ssl/private/postfix.dh
-  tags:
-    - renew
-
-- name: SSL - Remove DH configuration file
-  file: state=absent path=dhparam.pem
-  tags:
-    - renew
-
-- name: SSL - Protect autosigned private key
-  file: path=/etc/ssl/private/autosigned.postfix.key owner=root group={{ postfix.group }} mode=0640
 
 - name: SSL - Protect DH file
   file: path=/etc/ssl/private/postfix.dh owner=root group={{ postfix.group }} mode=0640
-
-- name: SSL - Set permission for autosigned public key
-  file: path=/etc/ssl/certs/autosigned.postfix.crt owner=root group={{ postfix.group }} mode=0644

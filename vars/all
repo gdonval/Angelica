@@ -156,7 +156,7 @@ firewall:
 ########
 smtp:
   enabled: True # Enable communication with SMTP server
-  port: 465 # SMTP output port to be opened
+  port: 25 # SMTP output port to be opened
   host: 127.0.0.1 # SMTP server host, choose your postfix server if you set up one
 
 
