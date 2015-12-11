@@ -211,7 +211,7 @@ php:
     session.cookie_httponly: 1 # Whether or not to add the httpOnly flag to the cookie
     session.gc_probability: 0 # Defines the probability that the 'garbage collection' process is started on every session initialization.
     session.gc_maxlifetime: 172800 # Session maximum lifetime
-    session.cookie_domain: ".project.com" # Cookie domain
+    session.cookie_domain: \".project.com\" # Cookie domain
     session.cookie_lifetime: 172800 # Cookie lifetime
     session.hash_function: 1 # Define session hash function (0 = md5 / 1 = sha1)
     opcache.enable: 1 # Determine whether or not enable opcache
