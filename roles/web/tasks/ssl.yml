@@ -30,9 +30,64 @@
     - applications.sites | default({})
     - "{{ [adminer] }}"
 
-- name: SSL - Create autosigned certificate
-  command: openssl req -nodes -newkey rsa:4096 -x509 -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN={{ item.url }}" -days 3650 -keyout /etc/ssl/private/autosigned.{{ item.short_name }}.key -out /etc/ssl/certs/autosigned.{{ item.short_name }}.crt
+- name: SSL - Create local CA certificate
+  command: openssl req -nodes -newkey rsa:4096 -x509 -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN={{ ssl.company.domain }}" -days 3650 -keyout /etc/ssl/private/ca.{{ item.short_name }}.key -out /etc/ssl/certs/ca.{{ item.short_name }}.crt
   when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+  tags:
+    - renew
+
+- name: SSL - Protect local CA private key
+  file: path=/etc/ssl/private/ca.{{ item.short_name }}.key owner=root group=root mode=0640
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+  tags:
+    - renew
+
+- name: SSL - Set local CA permissions
+  file: path=/etc/ssl/certs/ca.{{ item.short_name }}.crt owner=root group=www-data mode=0644
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+  tags:
+    - renew
+
+- name: SSL - Create needed local keys
+  command: openssl genrsa -out /etc/ssl/private/autosigned.{{ item.short_name }}.key 4096
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+  tags:
+    - renew
+
+- name: SSL - Create needed certificate requests
+  command: openssl req -new -key /etc/ssl/private/autosigned.{{ item.short_name }}.key -out /etc/ssl/certs/autosigned.{{ item.short_name }}.csr -subj "/C={{ ssl.company.country_code }}/ST={{ ssl.company.country }}/L={{ ssl.company.location }}/O={{ ssl.company.name }}/CN={{ item.url }}"
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+  tags:
+    - renew
+
+- name: SSL - Sign certificates
+  command: openssl x509 -req -in /etc/ssl/certs/autosigned.{{ item.short_name }}.csr -CA /etc/ssl/certs/ca.{{ item.short_name }}.crt -CAkey /etc/ssl/private/ca.{{ item.short_name }}.key -CAcreateserial -out /etc/ssl/certs/autosigned.{{ item.short_name }}.crt -days 3650
+  when: item.url is defined and (applications.enabled or adminer.enabled) and item.autosigned
+  with_flattened:
+    - applications.sites | default({})
+    - "{{ [adminer] }}"
+  tags:
+    - renew
+  notify:
+    - restart apache2
+
+- name: SSL - Delete certificate requests files
+  file: state=absent path=/etc/ssl/certs/autosigned.{{ item.short_name }}.csr
   with_flattened:
     - applications.sites | default({})
     - "{{ [adminer] }}"

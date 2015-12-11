@@ -21,10 +21,10 @@
   when: inventory_hostname in groups['web']
 
 - name: SSL - Make sure /etc/ssl/private exists and is explorable
-  file: state=directory path=/etc/ssl/private mode=744 owner=root group=root
+  file: state=directory path=/etc/ssl/private mode=755 owner=root group=root
 
 - name: SSL - Make sure /etc/ssl/certs exists and is explorable
-  file: state=directory path=/etc/ssl/certs mode=744 owner=root group=root
+  file: state=directory path=/etc/ssl/certs mode=755 owner=root group=root
 
 - name: SSL - Create sql temporary temporary local certificates
   local_action: file state=directory path=files/ssl/temps mode=777
