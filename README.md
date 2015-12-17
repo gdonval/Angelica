@@ -39,7 +39,7 @@ At least three environments are needed. It can be on a single machine or a infin
 
 - Verify that `python` and `ssh` are installed (the application servers):
 
-        $ sudo aptitude install python ssh
+        $ sudo aptitude install python ssh aptitude
 
 - Verify that [root](http://www.cyberciti.biz/faq/allow-root-account-to-use-ssh-openssh/) and password authentication are enabled - don’t worry, it will be disabled by ansible (the application servers).
 
@@ -104,6 +104,12 @@ Note: if you want to re-run only a part of a playbook, just add `--tags "your_ta
 - If needed, you can unmount by doing:
 
         # fusermount -u **your_vm_project_directory**
+
+- Copy the SSH public key of your deployer from your virtual machine to your host `authorized_keys` file.
+
+- Make sure to add you host fingerprint into your virtual machine deployer `known_hosts` file.
+
+- Authorize `allow_other` by uncommenting `user_allow_other` in `/etc/fuse.conf`.
 
 - You might need a few other tweaks to make sshfs works properly (permissions, conf, …). Watch the error messages.
 
