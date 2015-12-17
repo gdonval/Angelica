@@ -102,10 +102,14 @@
   run_once: true
   sudo: no
   register: check_ssl
+  tags:
+    - renew
 
 - name: SSL - Verify certificates
   fail: msg="Error while checking SSL certificates. {{ check_ssl.stdout}}"
   when: "check_ssl.stdout.find('./files/ssl/temps/server-cert.pem: OK\n./files/ssl/temps/client-cert.pem: OK') == -1"
+  tags:
+    - renew
 
 - name: SSL - Set sql servers CA certificate
   copy: src=files/ssl/temps/ca.pem dest=/etc/ssl/certs/sql-ca.pem owner=mysql group=sqlcert mode=0644 force=yes
