@@ -325,6 +325,7 @@ ssl:
     country_code: FR
     country: France
     location: Strasbourg
+    domain: project.com
 
 
 ###########
