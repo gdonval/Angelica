@@ -24,6 +24,8 @@ At least three environments are needed. It can be on a single machine or a infin
 - The ansible machine. This must be an Unix/Linux machine. You’ll start ansible deployment here.
 - The application server(s). A single or a bunch of VMs or distant machines to host a web, dbms or smtp server.
 
+Ansible 1.9+ is needed. Ansible 2+ don’t work.
+
 
 ### Prerequisite ###
 
@@ -37,7 +39,7 @@ At least three environments are needed. It can be on a single machine or a infin
 
 - Install [Debian Jessie](https://www.debian.org/distrib/) on the application server(s). Choose a root password (strong please, at least 16 chars). **It must be the same for all servers**, you can change it afterwards. (the application servers).
 
-- Verify that `python` and `ssh` are installed (the application servers):
+- Verify that `python`, `ssh` and `aptitude` are installed (the application servers):
 
         $ sudo aptitude install python ssh aptitude
 
@@ -78,7 +80,7 @@ Note: if you want to re-run only a part of a playbook, just add `--tags "your_ta
 
 - In your virtual machine, edit the file `/etc/rc.local` and add the following line (replace **33** by your guest apache user id and apache group id). Exemple with VirtualBox:
 
-        $ sudo mount.vboxsf -o umask=000,gid=33,uid=33 *Project_name* *Project_path*
+        $ sudo mount.vboxsf -o umask=000,gid=33,uid=33 *project_name* *project_path*
 
 - Shut down the guest VM and create a shared folder named after your project.
 
@@ -92,22 +94,28 @@ Note: if you want to re-run only a part of a playbook, just add `--tags "your_ta
 
 - Install sshfs on both the host and the guest;
 
-- Copy your virtual machine user public key on your host **~/.ssh/authorized_keys** file;
+- If needed, create SSH keys on the VM. Copy your virtual machine user public key on your host **~/.ssh/authorized_keys** file;
 
         $ ssh-keygen -b 4096 -t rsa -C "your_email@example.com"
         $ cat ~/.ssh/id_rsa.pub
 
 - In your virtual machine, edit the file `/etc/rc.local` (or add a **systemd** rule) and add the following line (replace **33** by your guest apache user id and apache group id):
 
-        $ sudo -u **your_user** sshfs -o allow_other,gid=33,uid=33 **your_host_user**@**your_host_ip**:**your_host_project_directory** **your_vm_project_directory** -p **your_host_ssh_port**
+        $ sudo -u *your_user* sshfs -o allow_other,gid=33,uid=33 *your_host_user*@*your_host_ip*:*your_host_project_directory* *your_vm_project_directory* -p *your_host_ssh_port*
+
+  Alternatively, use `/etc/fstab` and add this configuration:
+
+        *your_host_user*@*your_host_ip*:*your_host_project_directory* *your_vm_project_directory* fuse.sshfs x-systemd.device-timeout=10,noauto,x-systemd.automount,_netdev,user,IdentityFile=/home/*your_user*/.ssh/id_rsa,allow_other,default_permissions,uid=33,gid=33 0 0
+
+  Be warned, a single error in the paths or names (case sensitive), and you’ll get an error message. So double check before crying.
 
 - If needed, you can unmount by doing:
 
-        # fusermount -u **your_vm_project_directory**
-
-- Copy the SSH public key of your deployer from your virtual machine to your host `authorized_keys` file.
+        # fusermount -u *your_vm_project_directory*
 
 - Make sure to add you host fingerprint into your virtual machine deployer `known_hosts` file.
+
+- Check that the shared directory on the virtual machine is empty.
 
 - Authorize `allow_other` by uncommenting `user_allow_other` in `/etc/fuse.conf`.
 
