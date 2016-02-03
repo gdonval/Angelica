@@ -93,7 +93,7 @@ users:
       - "{{ shared_group.name }}" # User is in shared group
       - "{{ ssh.group }}" # Allows to connect with SSH - needs a key in files/sshkeys/
       - sudo # Grant user sudo usage
-      - scripts # Allow user to execute hand-made scripts
+      - "{{ script.group }}" # Allow user to execute hand-made scripts
       - adm # Allow user to read log files
       - backup # Allow user to access backup files
       - www-data # Allow user to access http files
