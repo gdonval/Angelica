@@ -22,7 +22,7 @@ echo -e "
 \033[0;35m+      \033[0;37mGroups \033[0;35m= \033[0;32m`groups $USER`
 \033[0;35m+   \033[0;37mProcesses \033[0;35m= \033[0;32m$PROCCOUNT of `ulimit -u` max"
 echo -e "\033[0;35m+++++++++++++++++++++++++: \033[0;37mHelpful Information\033[0;35m :+++++++++++++++++++++++++++"
-command -v php >/dev/null && echo -e "\033[0;35m+    \033[0;37mPHP ver. \033[0;35m= \033[0;32m`php -v | grep built`" || /bin/false
+command -v php >/dev/null && echo -e "\033[0;35m+    \033[0;37mPHP ver. \033[0;35m= \033[0;32m`php -v | sed -n 1p`" || /bin/false
 command -v apachectl >/dev/null && echo -e "\033[0;35m+ \033[0;37mApache ver. \033[0;35m= \033[0;32m`apachectl -v | grep version | awk '{ s = ""; for (i = 3; i <= NF; i++) s = s $i " "; print s }'`" || command -v /usr/sbin/apache2 >/dev/null && echo -e "\033[0;35m+ \033[0;37mApache ver. \033[0;35m= \033[0;32m`/usr/sbin/apache2 -v | grep version | awk '{ s = ""; for (i = 3; i <= NF; i++) s = s $i " "; print s }'`" || /bin/false
 command -v mysql >/dev/null && echo -e "\033[0;35m+  \033[0;37mMySQL ver. \033[0;35m= \033[0;32m`mysql -V|awk -F, {'print $1'}`" || /bin/false
 echo -e "\033[0;35m+     \033[0;37mUpdates \033[0;35m= \033[0;32m`apt-get --just-print upgrade | grep 'newly installed'|awk {'print $1'}` new package(s) available"
