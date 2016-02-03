@@ -14,5 +14,6 @@
 [Tt]humbs.db
 .DS_Store
 
-# Ignore netbeans file
+# Ignore IDE file
 nbproject/
+*.sublime-*
