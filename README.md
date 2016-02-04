@@ -105,7 +105,7 @@ Note: if you want to re-run only a part of a playbook, just add `--tags "your_ta
 
   Alternatively, use `/etc/fstab` and add this configuration:
 
-        *your_host_user*@*your_host_ip*:*your_host_project_directory* *your_vm_project_directory* fuse.sshfs x-systemd.device-timeout=10,noauto,x-systemd.automount,_netdev,user,IdentityFile=/home/*your_user*/.ssh/id_rsa,allow_other,default_permissions,uid=33,gid=33 0 0
+        *your_host_user*@*your_host_ip*:*your_host_project_directory* *your_vm_project_directory* fuse.sshfs x-systemd.device-timeout=10,x-systemd.automount,_netdev,user,IdentityFile=/home/*your_user*/.ssh/id_rsa,allow_other,default_permissions,uid=33,gid=33 0 0
 
   Be warned, a single error in the paths or names (case sensitive), and you’ll get an error message. So double check before crying.
 
@@ -113,7 +113,7 @@ Note: if you want to re-run only a part of a playbook, just add `--tags "your_ta
 
         # fusermount -u *your_vm_project_directory*
 
-- Make sure to add you host fingerprint into your virtual machine deployer `known_hosts` file.
+- Make sure to add you host fingerprint into your virtual machine deployer `known_hosts` file. (Tips: use `mount -a` if you chose the `/etc/fstab` solution).
 
 - Check that the shared directory on the virtual machine is empty.
 
