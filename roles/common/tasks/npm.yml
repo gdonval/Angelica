@@ -1,0 +1,9 @@
+---
+- name: npm - Install npm | update repositories
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: npm - Install npm
+  apt: name=npm state=present update_cache=yes force=yes
+
+- name: npm - Create symlink for nodeJS
+  file: src=/usr/bin/nodejs dest=/usr/bin/node state=link

@@ -37,11 +37,15 @@
   with_items:
     - "{{ sshfiles.results }}"
 
-# Ruby
+# CSSTools
 
-- name: Check - If compass is enabled, ruby too
+- name: Check - If csstools is enabled, ruby must be too
   fail: msg="Ruby is disabled but it is needed to install compass service. Verify that ruby.enabled = True."
-  when: compass.enabled and not ruby.enabled
+  when: csstools.enabled and not ruby.enabled
+
+- name: Check - If csstools is enabled, npm must be too
+  fail: msg="Node.JS is disabled but it is needed to install css services. Verify that npm.enabled = True."
+  when: csstools.enabled and not npm.enabled
 
 # SSH
 

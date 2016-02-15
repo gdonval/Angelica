@@ -36,5 +36,8 @@
 - include: ruby.yml tags=ruby
   when: ruby.enabled
 
+- include: npm.yml tags=npm
+  when: npm.enabled
+
 - include: ssl.yml tags=ssl
   when: ssl.enabled and mariadb.enabled

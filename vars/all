@@ -167,12 +167,20 @@ ruby:
   enabled: True # Install ruby
 
 
-###########
-# Compass #
-###########
+##########
+# NodeJS #
+##########
+npm:
+  enabled: True # Install npm
+
+
+############
+# CSSTools #
+############
 # Requires ruby
-compass:
-  enabled: True # Install the compass gem
+# Requires npm
+csstools:
+  enabled: True # Install the compass gem and uglifycss/js
 
 
 #######

@@ -4,8 +4,8 @@
 - include: php.yml tags=php
   when: php.enabled
 
-- include: compass.yml tags=compass
-  when: compass.enabled and ruby.enabled
+- include: csstools.yml tags=csstools
+  when: csstools.enabled and ruby.enabled and npm.enabled
 
 - include: ssl.yml tags=ssl
   when: ssl.enabled
