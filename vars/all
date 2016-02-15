@@ -318,7 +318,7 @@ adminer:
   url: db.project.com # Adminer URL
   alias: db.project.com # Adminer Alias
   email: admin@www.project.com
-  path: /usr/share/adminer/ # Adminer path
+  path: /var/www/adminer # Adminer path
   autosigned: True # Determine wether use an autosigned certificate or not
 
 

@@ -1,9 +1,12 @@
 ---
-- name: Adminer - Install adminer | update repositories
-  apt: update_cache=yes upgrade=safe state=latest
+- name: Adminer - Create adminer path
+  file: state=directory path={{ adminer.path }} owner=www-data group=www-data mode=0750
 
-- name: Adminer - Install adminer
-  apt: name=adminer state=present update_cache=yes force=yes
+- name: Adminer - Download adminer
+  get_url: url=https://www.adminer.org/latest.php dest={{ adminer.path }}index.php mode=0644 force=yes timeout=15
+
+- name: Adminer - Download adminer style
+  get_url: url=https://raw.githubusercontent.com/vrana/adminer/master/designs/brade/adminer.css dest={{ adminer.path }}adminer.css mode=0644 force=yes timeout=15
 
 - name: Adminer - Add to apache
   template: src=etc/apache2/sites-available/adminer.j2 dest=/etc/apache2/sites-available/020-{{ mariadb.domain }}.conf mode=0644 owner=root group=root
@@ -17,16 +20,14 @@
     - restart apache2
   when: apache.enabled
 
-- name: Adminer - Install a decent style for adminer
-  copy: src=usr/share/adminer/adminer.css dest={{ adminer.path }}adminer/
-
-- name: Adminer - Limit adminer to PDO if using SSL
-  template: src=usr/share/adminer/adminer/drivers/mysql.inc.php.j2 dest={{ adminer.path }}adminer/drivers/mysql.inc.php mode=0644 owner=root group=root backup=yes
-  when: ssl.enabled and mariadb.ssl
-
-- name: Adminer - Make sure PDO uses SSL
-  template: src=usr/share/adminer/adminer/include/pdo.inc.php.j2 dest={{ adminer.path }}adminer/include/pdo.inc.php mode=0644 owner=root group=root backup=yes
-  when: ssl.enabled and mariadb.ssl
-
 - name: Adminer - Set adminer domain name in hosts
   lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Adminer\s*$" line="127.0.0.1    {{ mariadb.domain }} {{ '#' }} Adminer"
+
+- name: Adminer - Authorize adminer in PHP openbasedir
+  lineinfile: dest={{ item }} state=present regexp='^(\s*;?\s*open_basedir\s*=\s*\")((?![^\"]*{{ adminer.path }}[^\"]*)[^\"]*)(\")$' line='\1\2:{{ adminer.path }}\3' backrefs=yes
+  with_items:
+    - /etc/php/7.0/cli/php.ini
+    - /etc/php/7.0/apache2/php.ini
+  notify:
+    - restart apache2
+  when: apache.enabled
