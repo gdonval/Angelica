@@ -60,7 +60,7 @@
   template: src=home/bashrc.j2 dest="/home/{{ item.name }}/.bashrc" mode=644 owner={{ item.name }} group={{ item.name }}
   when: item.name is defined
   with_flattened:
-    - users.other | default({})
+    - users.others | default({})
     - "{{ [users.deployer] }}"
 
 - name: Users - Install user profile configuration for zsh | check
@@ -71,7 +71,7 @@
   template: src=home/zshrc.j2 dest="/home/{{ item.name }}/.zshrc" mode=644 owner={{ item.name }} group={{ item.name }}
   when: item.name is defined and installed_zsh.stdout.find('install ok') != -1
   with_flattened:
-    - users.other | default({})
+    - users.others | default({})
     - "{{ [users.deployer] }}"
 
 - name: Users - Set skel for bash configuration
