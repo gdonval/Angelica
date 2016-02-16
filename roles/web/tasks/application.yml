@@ -1,27 +1,32 @@
 ---
-- name: Application - Create directory
-  file: state=directory dest={{ item.path }}{{ item.webdir }} owner=www-data group=www-data mode=0777 recurse=yes
+- name: Application - Create base directory
+  file: state=directory dest={{ item.path }} owner=www-data group=www-data mode=0777 recurse=yes
   with_items: applications.sites
 
+- name: Application - Create complete directory
+  file: state=directory dest={{ item.path }}{{ item.webdir }} owner=www-data group=www-data mode=0750 recurse=yes
+  with_items: applications.sites
+  when: not applications.download
+
 - name: Application - Get from GIT
-  git: clone=yes dest={{ item.path }}{{ item.webdir }} repo={{ item.gitrepo }} force=yes update=yes
+  git: clone=yes dest={{ item.path }} repo={{ item.gitrepo }} force=yes update=yes
   with_items: applications.sites
   sudo_user: "{{ users.deployer.name }}"
   when: applications.download
 
 - name: Application - Disable git filemode (handle permissions changes)
-  lineinfile: dest="{{ item.path }}{{ item.webdir }}.git/config" regexp="^\s*filemode\s*=\s*" line="  filemode = false"
+  lineinfile: dest="{{ item.path }}/.git/config" regexp="^\s*filemode\s*=\s*" line="  filemode = false"
   with_items: applications.sites
   when: applications.download
 
 - name: Application - Change owner and group
-  file: state=directory dest={{ item.path }}{{ item.webdir }} recurse=yes owner=www-data group=www-data
+  file: state=directory dest={{ item.path }} recurse=yes owner=www-data group=www-data
   with_items: applications.sites
 
 - name: Application - Permissions for directories
-  command: find {{ item.path }}{{ item.webdir }} -type d -exec chmod 0755 {} \;
+  command: find {{ item.path }} -type d -exec chmod 0750 {} \;
   with_items: applications.sites
 
 - name: Application - Premissions for files
-  command: find {{ item.path }}{{ item.webdir }} -type f -exec chmod 0760 {} \;
+  command: find {{ item.path }} -type f -exec chmod 0760 {} \;
   with_items: applications.sites

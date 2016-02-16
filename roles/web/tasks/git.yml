@@ -17,7 +17,8 @@
 - name: Git - Make git ignore permissions
   command: git config --global core.filemode false
 
-- name: Git - Ensure github.com is a known host
+- name: Git - Ensure ssh.github.com is a known host
   lineinfile: dest=/home/{{ users.deployer.name }}/.ssh/known_hosts create=yes state=present line="{{ lookup('pipe', 'ssh-keyscan -t rsa ssh.github.com') }}" regexp="^ssh.github\\.com"
 
-
+- name: Git - Ensure github.com is a known host
+  lineinfile: dest=/home/{{ users.deployer.name }}/.ssh/known_hosts create=yes state=present line="{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}" regexp="^github\\.com"

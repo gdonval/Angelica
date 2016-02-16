@@ -265,7 +265,7 @@ applications:
       alias: www.project.com # Alias of the application
       path: /var/www/project # Application path (without directory)
       webdir: / # Application specific web directory
-      gitrepo: git@github.com:gui-don/Angelica.git # Application git repository - Careful, use ssh.github.com, not just github.com
+      gitrepo: git@github.com:gui-don/Angelica.git # Application git repository
       autosigned: True # Determine wether use an autosigned certificate or not
       dbnames: # Create databases, let it empty if you don’t want any database
         - agl_db
