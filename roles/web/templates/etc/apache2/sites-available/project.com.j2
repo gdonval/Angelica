@@ -13,11 +13,16 @@
 <VirtualHost *:{% if ssl.enabled %}443{% else %}80{% endif %}{% if ssl.enabled and not ssl.force %} *:80{% endif %}>
     {% if ssl.enabled %}
     SSLEngine On
+        {% if not letsencrypt.enabled %}
     SSLCertificateFile /etc/ssl/certs/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.crt
     SSLCertificateKeyFile /etc/ssl/private/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.key
-    {% if not item.autosigned %}
+            {% if not item.autosigned %}
     SSLCertificateChainFile /etc/ssl/certs/{{ item.short_name }}.cabundle
-    {% endif %}
+            {% endif %}
+        {% else %}
+    SSLCertificateFile /etc/letsencrypt/live/{{ item.url }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.url }}/privkey.pem
+        {% endif %}
     {% endif %}
 
     ServerName default
@@ -31,11 +36,16 @@
     {% if ssl.enabled %}
 
     SSLEngine On
+        {% if not letsencrypt.enabled %}
     SSLCertificateFile /etc/ssl/certs/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.crt
     SSLCertificateKeyFile /etc/ssl/private/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.key
-    {% if not item.autosigned %}
+            {% if not item.autosigned %}
     SSLCertificateChainFile /etc/ssl/certs/{{ item.short_name }}.cabundle
-    {% endif %}
+            {% endif %}
+        {% else %}
+    SSLCertificateFile /etc/letsencrypt/live/{{ item.url }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.url }}/privkey.pem
+        {% endif %}
     SSLOptions +StrictRequire
     SSLProtocol all -SSLv2 -SSLv3
     SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
@@ -54,15 +64,15 @@
     Header set Content-Security-Policy "default-src 'self' 'unsafe-inline'; img-src data: 'self' 'unsafe-inline' {{ (item.security.allow.img | join(" ")) if item.security.allow.img.0 != None else '' }}; script-src 'self' 'unsafe-inline' 'unsafe-eval' {{ (item.security.allow.script | join(" ")) if item.security.allow.script.0 != None else '' }}; font-src 'self' 'unsafe-inline' {{ (item.security.allow.font | join(" ")) if item.security.allow.font.0 != None else '' }}; style-src 'self' 'unsafe-inline' {{ (item.security.allow.style | join(" ")) if item.security.allow.style.0 != None else '' }};"
 
     ServerAdmin {{ item.email }}
-    DocumentRoot "{{ item.path }}{{ item.webdir }}"
+    DocumentRoot "{{ item.path }}{{ item.webdir }}"
 
-    ServerName {{ item.url }}
-    ServerAlias {{ item.alias }}
+    ServerName {{ item.url }}
+    ServerAlias {{ item.alias }}
 
     ErrorLog ${APACHE_LOG_DIR}/{{ item.short_name }}.error.log
     CustomLog ${APACHE_LOG_DIR}/{{ item.short_name }}.access.log common
 
-    <Directory "{{ item.path }}{{ item.webdir }}">
+    <Directory "{{ item.path }}{{ item.webdir }}">
         Options -Indexes +FollowSymLinks +Includes
         AllowOverride All
         Require all granted

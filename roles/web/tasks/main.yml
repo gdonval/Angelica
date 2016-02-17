@@ -22,6 +22,9 @@
 - include: application.yml tags=applications
   when: applications.enabled
 
+- include: letsencrypt.yml tags=letsencrypt
+  when: letsencrypt.enabled and git.enabled and ssl.enabled
+
 - include: mariadb.yml tags=mariadb
   when: mariadb.enabled
 

@@ -16,3 +16,12 @@ php:
     display_errors: 'Off'
     display_startup_errors: 'Off'
     memory_limit: 64M # Memory limit per PHP user
+
+###############
+# Letsencrypt #
+###############
+# Requires GIT
+# Requires SSL
+letsencrypt:
+  enabled: True # Install letsencrypt service
+  path: /opt/letsencrypt # Path for letsencrypt software

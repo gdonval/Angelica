@@ -1,0 +1,38 @@
+---
+- name: Letsencrypt - Create base directory
+  file: state=directory dest={{ letsencrypt.path }} owner=root group=root mode=0777 recurse=yes
+
+- name: Letsencrypt - Get from GIT
+  git: clone=yes dest={{ letsencrypt.path }} repo=https://github.com/letsencrypt/letsencrypt force=yes update=yes
+  sudo_user: "{{ users.deployer.name }}"
+
+- name: Letsencrypt - Change owner and group
+  file: state=directory dest={{ letsencrypt.path }} recurse=yes owner=root group=root
+
+- name: Letsencrypt - Permissions for directories
+  command: find {{ letsencrypt.path }} -type d -exec chmod 0755 {} \;
+
+- name: Letsencrypt - Permissions for files
+  command: find {{ letsencrypt.path }} -type f -exec chmod 0644 {} \;
+
+- name: Letsencrypt - Create symlink for letsencrypt
+  file: src={{ letsencrypt.path }}/letsencrypt-auto dest=/usr/bin/letsencrypt state=link
+
+- name: Letsencrypt - Stop any web server
+  service: name=apache2 state=stopped
+  notify:
+    - restart apache2
+
+- name: Letsencrypt - Get certificate for adminer
+  command: letsencrypt --no-self-upgrade certonly --standalone -d {{ adminer.url }} --expand
+  args:
+    creates: "/etc/letsencrypt/live/{{ adminer.url }}"
+  when: adminer.enabled
+
+- name: Letsencrypt - Get certificate for applications
+  command: letsencrypt --no-self-upgrade certonly --standalone -d {{ item.url }} --expand
+  args:
+    creates: "/etc/letsencrypt/live/{{ item.url }}"
+  with_items: applications.sites
+  when: applications.enabled
+

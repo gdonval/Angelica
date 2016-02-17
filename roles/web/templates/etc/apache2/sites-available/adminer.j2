@@ -5,10 +5,15 @@
     {% if ssl.enabled %}
     SSLEngine On
 
-    SSLCertificateFile /etc/ssl/certs/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.crt
-    SSLCertificateKeyFile /etc/ssl/private/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.key
-    {% if not adminer.autosigned %}
-    SSLCertificateChainFile /etc/ssl/certs/{{ adminer.short_name }}.cabundle
+    {% if not letsencrypt.enabled %}
+        SSLCertificateFile /etc/ssl/certs/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.crt
+        SSLCertificateKeyFile /etc/ssl/private/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.key
+        {% if not adminer.autosigned %}
+        SSLCertificateChainFile /etc/ssl/certs/{{ adminer.short_name }}.cabundle
+        {% endif %}
+    {% else %}
+        SSLCertificateFile /etc/letsencrypt/live/{{ adminer.url }}/fullchain.pem
+        SSLCertificateKeyFile /etc/letsencrypt/live/{{ adminer.url }}/privkey.pem
     {% endif %}
     SSLOptions +StrictRequire
     SSLProtocol all -SSLv2 -SSLv3
@@ -24,17 +29,17 @@
     Header set Content-Security-Policy "default-src 'self' 'unsafe-inline'; img-src data: 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
 
     ServerAdmin {{ adminer.email }}
-    DocumentRoot "{{ adminer.path }}"
+    DocumentRoot "{{ adminer.path }}"
 
-    ServerName {{ mariadb.domain }}
-    ServerAlias {{ adminer.alias }}
+    ServerName {{ mariadb.domain }}
+    ServerAlias {{ adminer.alias }}
 
-    ErrorLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.error.log
-    CustomLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.access.log common
+    ErrorLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.error.log
+    CustomLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.access.log common
 
-    Alias /adminer {{ adminer.path }}
+    Alias /adminer {{ adminer.path }}
 
-    <Directory "{{ adminer.path }}">
+    <Directory "{{ adminer.path }}">
         Options -Indexes +FollowSymLinks +Includes
         AllowOverride All
         Require all granted

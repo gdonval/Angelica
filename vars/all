@@ -295,6 +295,16 @@ apache:
     - ssl
 
 
+###############
+# Letsencrypt #
+###############
+# Requires GIT
+# Requires SSL
+letsencrypt:
+  enabled: False # Install letsencrypt service
+  path: /opt/letsencrypt # Path for letsencrypt software
+
+
 #########
 # Nginx # NOT IMPLEMENTED YET
 #########
