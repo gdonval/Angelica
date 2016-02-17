@@ -268,6 +268,7 @@ applications:
       gitrepo: git@github.com:gui-don/Angelica.git # Application git repository
       autosigned: True # Determine wether use an autosigned certificate or not
       dbnames: # Create databases, let it empty if you don’t want any database
+      composer: False # Determine whether it’s necessary to install composer or not
         - agl_db
       security: # CSR security
         allow:

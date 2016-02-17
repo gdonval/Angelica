@@ -30,3 +30,21 @@
 - name: Application - Premissions for files
   command: find {{ item.path }} -type f -exec chmod 0760 {} \;
   with_items: applications.sites
+
+- name: Download composer installer
+  get_url: url=https://getcomposer.org/installer dest={{ item.path }}/composer-setup.php
+  with_items: applications.sites
+  when: item.composer
+
+- name: Install composer
+  command: php {{ item.path }}/composer-setup.php --install-dir {{ item.path }}
+  args:
+    creates: "{{ item.path }}/composer.phar"
+  sudo_user: www-data
+  with_items: applications.sites
+  when: item.composer
+
+- name: Remove installer composer
+  file: path={{ item.path }}/composer-setup.php state=absent
+  with_items: applications.sites
+  when: item.composer
