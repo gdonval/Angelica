@@ -4,7 +4,7 @@
   with_items: applications.sites
 
 - name: Application - Create complete directory
-  file: state=directory dest={{ item.path }}{{ item.webdir }} owner=www-data group=www-data mode=0750 recurse=yes
+  file: state=directory dest={{ item.path }}{{ item.webdir }} owner=www-data group=www-data mode=0770 recurse=yes
   with_items: applications.sites
   when: not applications.download
 
@@ -24,7 +24,7 @@
   with_items: applications.sites
 
 - name: Application - Permissions for directories
-  command: find {{ item.path }} -type d -exec chmod 0750 {} \;
+  command: find {{ item.path }} -type d -exec chmod 0770 {} \;
   with_items: applications.sites
 
 - name: Application - Premissions for files
