@@ -16,7 +16,7 @@
   with_items: applications.sites
 
 - name: Apache2 - Add application vhosts
-  template: src=etc/apache2/sites-available/project.com.j2 dest=/etc/apache2/sites-available/010-{{ item.url }}.conf mode=0644 owner=root group=root
+  template: src=etc/apache2/sites-available/project.j2 dest=/etc/apache2/sites-available/010-{{ item.url }}.conf mode=0644 owner=root group=root
   with_items: applications.sites
 
 - name: Apache2 - Activate main vhosts
