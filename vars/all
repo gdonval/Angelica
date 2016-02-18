@@ -262,7 +262,7 @@ applications:
       email: admin@www.project.com
       short_name: project # Project short name (no special chars)
       url: www.project.com # Url of the application
-      alias: www.project.com # Alias of the application
+      alias: project.com # Alias of the application
       path: /var/www/project # Application path (without directory)
       webdir: / # Application specific web directory
       gitrepo: git@github.com:gui-don/Angelica.git # Application git repository

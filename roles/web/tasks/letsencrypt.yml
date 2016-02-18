@@ -1,4 +1,5 @@
 ---
+
 - name: Letsencrypt - Create base directory
   file: state=directory dest={{ letsencrypt.path }} owner=root group=root mode=0777 recurse=yes
 
@@ -30,7 +31,7 @@
   when: adminer.enabled
 
 - name: Letsencrypt - Get certificate for applications
-  command: letsencrypt --no-self-upgrade certonly --standalone -d {{ item.url }} --expand
+  command: letsencrypt --no-self-upgrade certonly --standalone -d {{ item.url }} -d {{ item.alias }} --expand
   args:
     creates: "/etc/letsencrypt/live/{{ item.url }}"
   with_items: applications.sites
