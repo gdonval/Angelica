@@ -4,6 +4,8 @@
 
 Listen 80
 
+    {% if ssl.enabled %}
+
 <IfModule ssl_module>
 	Listen 443
 </IfModule>
@@ -11,8 +13,10 @@ Listen 80
 <IfModule mod_gnutls.c>
 	Listen 443
 </IfModule>
+    {% endif %}
 
-{% if adminer.enabled %}
+    {% if adminer.enabled %}
+
 # Listen to HTTP alternative port
 Listen {{ adminer.port }}
 {% endif %}

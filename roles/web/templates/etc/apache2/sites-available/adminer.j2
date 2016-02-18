@@ -1,3 +1,30 @@
+##
+# Default for undefined domain name - 404
+##
+<VirtualHost *:{{ adminer.port }}>
+    {% if ssl.enabled %}
+
+    SSLEngine On
+
+        {% if not letsencrypt.enabled %}
+
+    SSLCertificateFile /etc/ssl/certs/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.crt
+    SSLCertificateKeyFile /etc/ssl/private/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.key
+            {% if not adminer.autosigned %}
+
+    SSLCertificateChainFile /etc/ssl/certs/{{ adminer.short_name }}.cabundle
+            {% endif %}
+        {% else %}
+
+    SSLCertificateFile /etc/letsencrypt/live/{{ adminer.url }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ adminer.url }}/privkey.pem
+        {% endif %}
+    {% endif %}
+
+    ServerName default
+    Redirect 404 /
+ </VirtualHost>
+
 ###
 # Vhost - adminer
 ###
@@ -5,16 +32,20 @@
     {% if ssl.enabled %}
     SSLEngine On
 
-    {% if not letsencrypt.enabled %}
-        SSLCertificateFile /etc/ssl/certs/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.crt
-        SSLCertificateKeyFile /etc/ssl/private/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.key
-        {% if not adminer.autosigned %}
-        SSLCertificateChainFile /etc/ssl/certs/{{ adminer.short_name }}.cabundle
+        {% if not letsencrypt.enabled %}
+
+    SSLCertificateFile /etc/ssl/certs/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.crt
+    SSLCertificateKeyFile /etc/ssl/private/{% if adminer.autosigned %}autosigned.{% endif %}{{ adminer.short_name }}.key
+            {% if not adminer.autosigned %}
+
+    SSLCertificateChainFile /etc/ssl/certs/{{ adminer.short_name }}.cabundle
+            {% endif %}
+        {% else %}
+
+    SSLCertificateFile /etc/letsencrypt/live/{{ adminer.url }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ adminer.url }}/privkey.pem
         {% endif %}
-    {% else %}
-        SSLCertificateFile /etc/letsencrypt/live/{{ adminer.url }}/fullchain.pem
-        SSLCertificateKeyFile /etc/letsencrypt/live/{{ adminer.url }}/privkey.pem
-    {% endif %}
+
     SSLOptions +StrictRequire
     SSLProtocol all -SSLv2 -SSLv3
     SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
@@ -25,13 +56,17 @@
     AddType application/x-pkcs7-crl         .crl
     {% endif %}
 
-    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        {% if not adminer.autosigned or letsencrypt.enabled %}
+
+    Header add Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        {% endif %}
+
     Header set Content-Security-Policy "default-src 'self' 'unsafe-inline'; img-src data: 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
 
     ServerAdmin {{ adminer.email }}
     DocumentRoot "{{ adminer.path }}"
 
-    ServerName {{ mariadb.domain }}
+    ServerName {{ adminer.url }}
     ServerAlias {{ adminer.alias }}
 
     ErrorLog ${APACHE_LOG_DIR}/{{ mariadb.domain }}.error.log

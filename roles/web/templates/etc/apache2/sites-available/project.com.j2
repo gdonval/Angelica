@@ -1,17 +1,9 @@
-{% if ssl.enabled and ssl.force %}
-# Force SSL
-<VirtualHost *:80>
-    RewriteEngine On
-    RewriteCond %{HTTPS} !on
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-</VirtualHost>
-{% endif %}
+{% if ssl.enabled %}
 
 ##
-# Default action 404
+# Default for undefined domain name - 404
 ##
-<VirtualHost *:{% if ssl.enabled %}443{% else %}80{% endif %}{% if ssl.enabled and not ssl.force %} *:80{% endif %}>
-    {% if ssl.enabled %}
+<VirtualHost *:443>
     SSLEngine On
         {% if not letsencrypt.enabled %}
     SSLCertificateFile /etc/ssl/certs/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.crt
@@ -23,11 +15,25 @@
     SSLCertificateFile /etc/letsencrypt/live/{{ item.url }}/fullchain.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.url }}/privkey.pem
         {% endif %}
-    {% endif %}
 
     ServerName default
     Redirect 404 /
+ </VirtualHost>
+
+    {% if ssl.force %}
+
+##
+# Force HTTPS everywhere
+##
+<VirtualHost *:80>
+    ServerName {{ item.url }}
+    ServerAlias {{ item.alias }}
+
+    Redirect permanent / https://{{ item.url }}/
 </VirtualHost>
+    {% endif %}
+
+{% endif %}
 
 ###
 # {{ item.name }} vhost
@@ -37,15 +43,19 @@
 
     SSLEngine On
         {% if not letsencrypt.enabled %}
+
     SSLCertificateFile /etc/ssl/certs/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.crt
     SSLCertificateKeyFile /etc/ssl/private/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.key
             {% if not item.autosigned %}
+
     SSLCertificateChainFile /etc/ssl/certs/{{ item.short_name }}.cabundle
             {% endif %}
         {% else %}
+
     SSLCertificateFile /etc/letsencrypt/live/{{ item.url }}/fullchain.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.url }}/privkey.pem
         {% endif %}
+
     SSLOptions +StrictRequire
     SSLProtocol all -SSLv2 -SSLv3
     SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
@@ -60,7 +70,11 @@
     SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
     {% endif %}
 
+        {% if not item.autosigned or letsencrypt.enabled %}
+
     Header add Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        {% endif %}
+
     Header set Content-Security-Policy "default-src 'self' 'unsafe-inline'; img-src data: 'self' 'unsafe-inline' {{ (item.security.allow.img | join(" ")) if item.security.allow.img.0 != None else '' }}; script-src 'self' 'unsafe-inline' 'unsafe-eval' {{ (item.security.allow.script | join(" ")) if item.security.allow.script.0 != None else '' }}; font-src 'self' 'unsafe-inline' {{ (item.security.allow.font | join(" ")) if item.security.allow.font.0 != None else '' }}; style-src 'self' 'unsafe-inline' {{ (item.security.allow.style | join(" ")) if item.security.allow.style.0 != None else '' }};"
 
     ServerAdmin {{ item.email }}

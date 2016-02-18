@@ -11,18 +11,22 @@
 - name: Apache2 - Remove all available sites
   command: find /etc/apache2/sites-available/ -type l -exec rm -f "{}" \;
 
-- name: Apache2 - Add application websites
+- name: Apache2 - Add default vhost
+  template: src=etc/apache2/sites-available/default.j2 dest=/etc/apache2/sites-available/000-default.conf mode=0644 owner=root group=root
+  with_items: applications.sites
+
+- name: Apache2 - Add application vhosts
   template: src=etc/apache2/sites-available/project.com.j2 dest=/etc/apache2/sites-available/010-{{ item.url }}.conf mode=0644 owner=root group=root
   with_items: applications.sites
 
-- name: Apache2 - Activate main website
+- name: Apache2 - Activate main vhosts
   command: a2ensite 010-{{ item.url }} creates=/etc/apache2/sites-enabled/010-{{ item.url }}.conf
   with_items: applications.sites
   notify:
     - restart apache2
 
-- name: Apache2 - Disable default website
-  command: a2dissite 000-default
+- name: Apache2 - Activate default vhost
+  command: a2ensite 000-default
   notify:
     - restart apache2
 
