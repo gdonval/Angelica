@@ -120,13 +120,3 @@
     - ::1
   notify:
     - restart mysql
-
-- name: MariaDB - Copy save database script
-  template: src=undefined/scripts/saveDatabase.sh.j2 dest="{{ script.path }}saveDatabase.sh" mode=0750 owner=root group={{ script.group }}
-  when: script.enabled
-
-- name: MariaDB - Backup database every day, 6AM
-  cron: name="save database" hour="6" minute="0" job="{{ script.path }}saveDatabase.sh" user={{ backup.user.name }}
-  when: script.enabled
-  notify:
-    - restart cron

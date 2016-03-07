@@ -19,7 +19,7 @@ for dbName in ${DATABASE_NAMES[*]}; do
   mysqldump -u $DATABASE_USER -p$DATABASE_PASSWORD --port=$DATABASE_PORT $dbName > $DUMPNAME.sql
   echo -e "\e[0;35m### done\e[0m"
 
-  # Compresse database dump
+  # Compress database dump
   echo -e "\e[0;35m### Compressing database dump $DUMPNAME.sql… \e[0m"
   tar -zcf $DUMPNAME.tar.gz $DUMPNAME.sql
   rm $DUMPNAME.sql

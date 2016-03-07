@@ -6,3 +6,6 @@
 
 - include: scripts.yml tags=scripts
   when: script.enabled
+
+- include: backup.yml tags=backup
+  when: backup.enabled

@@ -1,2 +1,8 @@
 ---
 # Maria DB
+
+# Backup
+
+- name: Check - If backup is enabled, scripts too
+  fail: msg="Scripts is disabled but it is needed to install backup service. Verify that script.enabled = True."
+  when: backup.enabled and not script.enabled
