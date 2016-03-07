@@ -101,3 +101,17 @@
 - name: Check - xdebug extension must be present if xdebug is enabled
   fail: msg="xDebug is enabled but will not be installed. Verify that php.extensions contains “xdebug”"
   when: php.xdebug.enabled and not "xdebug" in php.extensions
+
+# Letsencrypt
+
+- name: Check - SSL must be present if letsencrypt is enabled
+  fail: msg="SSL is disabled but it is needed by letsencrypt service. Verify that ssl.enabled = True, and re-run play-common.yml."
+  when: letsencrypt.enabled and not ssl.enabled
+
+- name: Check - GIT must be present if letsencrypt is enabled
+  fail: msg="GIT is disabled but it is needed by letsencrypt service. Verify that git.enabled = True, and re-run play-common.yml."
+  when: letsencrypt.enabled and not git.enabled
+
+- name: Check - Scripts must be present if letsencrypt is enabled
+  fail: msg="Scripts are disabled but they are needed by letsencrypt service. Verify that scripts.enabled = True, and re-run play-common.yml."
+  when: letsencrypt.enabled and not script.enabled

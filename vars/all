@@ -301,6 +301,7 @@ apache:
 ###############
 # Requires GIT
 # Requires SSL
+# Requires Script
 letsencrypt:
   enabled: False # Install letsencrypt service
   path: /opt/letsencrypt # Path for letsencrypt software

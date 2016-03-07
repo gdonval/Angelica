@@ -1,0 +1,16 @@
+#!/bin/bash
+
+###########################################
+# Script - Renew Letsencrypt certificates #
+###########################################
+
+# Initialisation
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $CURRENT_DIR'/init.sh'
+echo -e "\e[1;35m### Renew SSL certificates with letsencrypt - `date`"
+
+echo -e "\e[0;35m### Renewing all certificates… \e[0m"
+apachectl stop
+letsencrypt renew -nvv --standalone
+apachectl start
+echo -e "\e[0;35m### done\e[0m"

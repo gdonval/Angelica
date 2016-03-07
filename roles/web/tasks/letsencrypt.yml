@@ -11,29 +11,42 @@
   file: state=directory dest={{ letsencrypt.path }} recurse=yes owner=root group=root
 
 - name: Letsencrypt - Permissions for directories
-  command: find {{ letsencrypt.path }} -type d -exec chmod 0755 {} \;
+  command: find {{ letsencrypt.path }} -type d -exec chmod 0750 {} \;
 
 - name: Letsencrypt - Permissions for files
-  command: find {{ letsencrypt.path }} -type f -exec chmod 0644 {} \;
+  command: find {{ letsencrypt.path }} -type f -exec chmod 0760 {} \;
 
 - name: Letsencrypt - Create symlink for letsencrypt
   file: src={{ letsencrypt.path }}/letsencrypt-auto dest=/usr/bin/letsencrypt state=link
+  ignore_errors: yes
 
-- name: Letsencrypt - Stop any web server
+- name: Letsencrypt - Stop any server
   service: name=apache2 state=stopped
-  notify:
-    - restart apache2
 
 - name: Letsencrypt - Get certificate for adminer
-  command: letsencrypt --no-self-upgrade certonly --standalone -d {{ adminer.url }} --expand
+  command: letsencrypt certonly --standalone -d {{ adminer.url }} --expand --email {{ adminer.email }}
   args:
     creates: "/etc/letsencrypt/live/{{ adminer.url }}"
   when: adminer.enabled
+  tags:
+    - renew
 
 - name: Letsencrypt - Get certificate for applications
-  command: letsencrypt --no-self-upgrade certonly --standalone -d {{ item.url }} -d {{ item.alias }} --expand
+  command: letsencrypt certonly --standalone -d {{ item.url }} -d {{ item.alias }} --expand --email {{ item.email }}
   args:
     creates: "/etc/letsencrypt/live/{{ item.url }}"
   with_items: applications.sites
   when: applications.enabled
+  tags:
+    - renew
 
+- name: Letsencrypt - Copy renewal script
+  template: src=undefined/scripts/renewLetsencryptCertificates.sh.j2 dest="{{ script.path }}renewLetsencryptCertificates.sh" mode=0750 owner=root group={{ script.group }}
+
+- name: Letsencrypt - Renew certificates every 1st of the month, 4AM
+  cron: name="Save database" day="1" hour="4" minute="0" job="{{ script.path }}renewLetsencryptCertificates.sh" user=root
+  notify:
+    - restart cron
+
+- name: Letsencrypt - Start any server
+  service: name=apache2 state=restarted
