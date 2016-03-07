@@ -6,12 +6,15 @@
 <VirtualHost *:443>
     SSLEngine On
         {% if not letsencrypt.enabled %}
+
     SSLCertificateFile /etc/ssl/certs/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.crt
     SSLCertificateKeyFile /etc/ssl/private/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.key
             {% if not item.autosigned %}
+
     SSLCertificateChainFile /etc/ssl/certs/{{ item.short_name }}.cabundle
             {% endif %}
         {% else %}
+
     SSLCertificateFile /etc/letsencrypt/live/{{ item.url }}/fullchain.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.url }}/privkey.pem
         {% endif %}
@@ -20,7 +23,7 @@
     Redirect 404 /
  </VirtualHost>
 
-    {% if ssl.force %}
+{% if ssl.force %}
 
 ##
 # Force HTTPS everywhere
@@ -32,6 +35,42 @@
     Redirect permanent / https://{{ item.url }}/
 </VirtualHost>
     {% endif %}
+
+{% endif %}
+
+{% if item.url != item.alias %}
+
+##
+# Redirect alias to main site
+##
+<VirtualHost *:{% if ssl.enabled %}443{% else %}80{% endif %}{% if ssl.enabled and not ssl.force %} *:80{% endif %}>
+    {% if ssl.enabled %}
+
+    SSLEngine On
+        {% if not letsencrypt.enabled %}
+
+    SSLCertificateFile /etc/ssl/certs/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.crt
+    SSLCertificateKeyFile /etc/ssl/private/{% if item.autosigned %}autosigned.{% endif %}{{ item.short_name }}.key
+            {% if not item.autosigned %}
+
+    SSLCertificateChainFile /etc/ssl/certs/{{ item.short_name }}.cabundle
+            {% endif %}
+        {% else %}
+
+    SSLCertificateFile /etc/letsencrypt/live/{{ item.url }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.url }}/privkey.pem
+        {% endif %} # not letsencrypt.enabled
+
+    ServerName {{ item.alias }}
+    Redirect permanent / https://{{ item.url }}/
+
+    {% else %} # not ssl.enabled
+
+    ServerName {{ item.alias }}
+    Redirect permanent / http://{{ item.url }}/
+    {% endif %}
+
+</VirtualHost>
 
 {% endif %}
 
