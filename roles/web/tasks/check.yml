@@ -81,8 +81,6 @@
   when: "{{ (applications.enabled or adminer.enabled) and ( ( applications.sites | default({})) | map(attribute='name') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
   with_items: "{{ (applications.sites | default([])) | map(attribute='name') | list }}"
 
-- debug: var="{{ ((applications.sites | default([])) + [adminer]) | map(attribute='short_name') | list }}"
-
 - name: Check - Application sites must have unique short_names
   fail: msg="It seems several sites have the same short_name “{{ item }}”. Please, choose a different short name for each site."
   when: "{{ (applications.enabled or adminer.enabled) and ( ( (applications.sites | default({})) + [adminer]) | map(attribute='short_name') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
@@ -90,7 +88,7 @@
 
 - name: Check - Application sites must have unique urls
   fail: msg="It seems several sites have the same URLs “{{ item }}”. Please, choose a different short name for each site."
-  when: "{{ (applications.enabled or adminer.enabled) and ( ( (applications.sites | default({})) + [adminer]) | map(attribute='url') | join(',') | match('.*' + item + ',.*' + item + '.*') ) }}"
+  when: "{{ (applications.enabled or adminer.enabled) and ( ( (applications.sites | default({})) + [adminer]) | map(attribute='url') | join(',') | match(item + ',' + item) ) }}"
   with_items: "{{ ((applications.sites | default([])) + [adminer]) | map(attribute='url') | list }}"
 
 - name: Check - Application sites must have unique paths
