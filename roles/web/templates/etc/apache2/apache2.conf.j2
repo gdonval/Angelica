@@ -227,10 +227,9 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 FileETag none
 
 # Browser cache
-# 7 days
 <IfModule mod_headers.c>
-		Header set Cache-Control "public,max-age=604800"
 	<filesMatch ".(ico|flv|jpg|jpeg|png|svg|gif|js|css|swf|html|htm|xml|txt|woff|woff2)$">
+		Header set Cache-Control "{{ apache.options.cache }}"
 	</filesMatch>
 </IfModule>
 

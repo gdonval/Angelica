@@ -293,7 +293,8 @@ apache:
     - rewrite
     - headers
     - ssl
-
+  options:
+    cache: public,max-age=86400,must-revalidate # Cache options for static resources
 
 ###############
 # Letsencrypt #
