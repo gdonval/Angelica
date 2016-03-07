@@ -58,3 +58,11 @@ php:
 ################
 applications:
   download: False
+
+
+###########
+# Apache2 #
+###########
+apache:
+  options:
+    cache: no-cache # Cache options for static resources
