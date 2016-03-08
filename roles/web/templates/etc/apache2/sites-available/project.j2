@@ -111,7 +111,7 @@
 
         {% if not item.autosigned or letsencrypt.enabled %}
 
-    Header add Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header add Strict-Transport-Security "max-age=31536000"
         {% endif %}
 
     Header set Content-Security-Policy "default-src 'self' 'unsafe-inline'; img-src data: 'self' 'unsafe-inline' {{ (item.security.allow.img | join(" ")) if item.security.allow.img.0 != None else '' }}; script-src 'self' 'unsafe-inline' 'unsafe-eval' {{ (item.security.allow.script | join(" ")) if item.security.allow.script.0 != None else '' }}; font-src 'self' 'unsafe-inline' {{ (item.security.allow.font | join(" ")) if item.security.allow.font.0 != None else '' }}; style-src 'self' 'unsafe-inline' {{ (item.security.allow.style | join(" ")) if item.security.allow.style.0 != None else '' }};"
