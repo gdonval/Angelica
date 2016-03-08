@@ -4,4 +4,5 @@
 # Feel free to change options
 # It overrides vars/all, vars/db, vars/web, vars/backup, vars/smtp and vars/stage
 
-precedence: stage_web
+precedence:
+  33: stage_web

@@ -3,7 +3,8 @@
 # Feel free to change options
 # It overrides vars/all, vars/db, vars/web, vars/backup and vars/smtp
 
-precedence: stage
+precedence:
+  20: stage
 
 #######
 # PHP #
