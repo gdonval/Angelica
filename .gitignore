@@ -17,3 +17,24 @@
 # Ignore IDE file
 nbproject/
 *.sublime-*
+
+hosts/*
+!hosts/local.dist
+!hosts/stage.dist
+!hosts/local.dist
+
+vars/all
+vars/type/*
+!vars/type/web.dist
+!vars/type/db.dist
+!vars/type/mail.dist
+!vars/type/backup.dist
+vars/local/
+!vars/local/local.dist
+!vars/local/local_*.dist
+vars/stage/
+!vars/stage/stage.dist
+!vars/stage/stage_*.dist
+vars/prod/
+!vars/prod/prod.dist
+!vars/prod/prod_*.dist
