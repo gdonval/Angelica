@@ -30,7 +30,7 @@ ssh:
   enabled: True # Install and configure SSH
   port: 22222 # SSH port
   group: sshenabled # SSH group
-  options:
+  server:
     Protocol: '2' # Version
     UsePrivilegeSeparation: 'yes' # Privilege separation
     SyslogFacility: 'AUTH' # Logging
@@ -54,6 +54,16 @@ ssh:
     ClientAliveCountMax: '0'
     X11Forwarding: 'no' # Enable X forwading to be able to see windows from distant
     Subsystem: 'sftp /usr/lib/sftp-server'
+    KexAlgorithms: 'curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256' # Key exchange algorithms
+    Ciphers: 'chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr' # SSH ciphers
+    MACs: 'hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-ripemd160-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160' # MAC hashs
+  client:
+    HashKnownHosts: 'yes' # Whether or not hash know hosts
+    KexAlgorithms: 'curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256' # Key exchange algorithms
+    Ciphers: 'chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr' # SSH ciphers
+    MACs: 'hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-ripemd160-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160' # MAC hashs
+    ConnectTimeout: '20'
+    ServerAliveInterval: '30'
 
 
 ################

@@ -32,13 +32,23 @@
   tags:
     - renew
 
+- name: SSH - Remove ED25519 public key
+  file: state=absent path=/etc/ssh/ssh_host_ed25519_key.pub
+  tags:
+    - renew
+
+- name: SSH - Remove ED25519 private key
+  file: state=absent path=/etc/ssh/ssh_host_ed25519_key
+  tags:
+    - renew
+
 - name: SSH - Regenerate server RSA key
   command: ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa -b 4096 creates=/etc/ssh/ssh_host_rsa_key
   tags:
     - renew
 
-- name: SSH - Regenerate server ECDSA key
-  command: ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N '' -t ecdsa -b 521 creates=/etc/ssh/ssh_host_ecdsa_key
+- name: SSH - Regenerate server ED25519 key
+  command: ssh-keygen -f /etc/ssh/ssh_host_ed25519_key -N '' -t ed25519 creates=/etc/ssh/ssh_host_ed25519_key
   tags:
     - renew
 
@@ -52,8 +62,14 @@
   notify:
     - restart ssh
 
-- name: SSH - Install other SSH configuration
+- name: SSH - Install server SSH configuration
   lineinfile: dest=/etc/ssh/sshd_config state=present regexp='^\#?\s*{{ item.key }}\s' line="{{ item.key }} {{ item.value }}"
-  with_dict: "{{ ssh.options }}"
+  with_dict: "{{ ssh.server }}"
+  notify:
+    - restart ssh
+
+- name: SSH - Install SSH client configuration
+  lineinfile: dest=/etc/ssh/ssh_config state=present regexp='^\#?\s*{{ item.key }}\s' line="{{ item.key }} {{ item.value }}"
+  with_dict: "{{ ssh.client }}"
   notify:
     - restart ssh
