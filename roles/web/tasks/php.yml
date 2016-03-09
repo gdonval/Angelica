@@ -1,14 +1,16 @@
 ---
 - name: PHP - Add repository for PHP
-  apt_repository: repo={{ item }} state=present
-  with_items:
-    - deb http://packages.dotdeb.org wheezy-php56 all
-    - deb-src http://packages.dotdeb.org wheezy-php56 all
-  when: php.dotdeb
+  apt_repository: repo="{{ item }}" state=present
+  with_items: php.sources
+  when: php.external
 
-- name: PHP - Add dotdeb key
-  apt_key: url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2098A6E
-  when: php.dotdeb
+- name: PHP - Add external repository key via URL
+  apt_key: url="{{ php.aptkey.url }}"
+  when: php.external and php.aptkey.url
+
+- name: PHP - Add external repository key via keyserver
+  apt_key: keyserver="{{ php.aptkey.keyserver }}" id="{{ php.aptkey.id }}"
+  when: php.external and php.aptkey.keyserver and php.aptkey.id
 
 - name: PHP - Install php5 | update repositories
   apt: update_cache=yes upgrade=safe state=latest

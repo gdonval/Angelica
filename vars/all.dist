@@ -194,7 +194,14 @@ csstools:
 #######
 php:
   enabled: True # Install php5
-  dotdeb: False # If True, install the dotdeb version
+  external: True # If True, install the dotdeb version
+  sources: # External source packages
+    - 'deb http://packages.dotdeb.org jessie all'
+    - 'deb-src http://packages.dotdeb.org jessie all'
+  aptkey:
+    url: 'https://www.dotdeb.org/dotdeb.gpg'  # Apt key url
+    keyserver: # Keyserver
+    id: # Id of the key on the key server
   extensions: # List of the PHP5 (additionnal) extensions to install
     - gd
     - intl
