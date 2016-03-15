@@ -26,7 +26,7 @@
   register: sshfiles
   delegate_to: 127.0.0.1
   sudo: no
-  when: item.name is defined and "'{{ ssh.group }}' in item.groups"
+  when: item.name is defined and '{{ ssh.group }}' in item.groups
   with_flattened:
     - users.others | default({})
     - "{{ [users.deployer] }}"
