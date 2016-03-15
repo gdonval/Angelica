@@ -1,17 +1,7 @@
 ---
 # This is the staging env specific configuration file
-# Feel free to change options
+# Feel free to change options after removing the .dist extension
 # It overrides vars/all, vars/db, vars/web, vars/backup and vars/smtp
 
 precedence:
   20: stage
-
-#######
-# PHP #
-#######
-php:
-  options:
-    opcache.revalidate_freq: 600
-    display_errors: 'Off'
-    display_startup_errors: 'Off'
-    memory_limit: 64M # Memory limit per PHP user

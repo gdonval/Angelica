@@ -1,7 +1,7 @@
 ---
 
 # This is the backup specific configuration file
-# Feel free to change options
+# Feel free to change options after removing the .dist extension
 # It overrides vars/all
 
 precedence:

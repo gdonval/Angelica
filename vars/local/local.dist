@@ -1,68 +1,8 @@
 ---
 
 # This is the local env specific configuration file
-# Feel free to change options
+# Feel free to change options after removing the .dist extension
 # It overrides vars/all, vars/db, vars/web, vars/backup and vars/mail
 
 precedence:
   20: local
-
-##########
-# Backup #
-##########
-backup:
-  enabled: False
-
-
-#######
-# SSH #
-#######
-ssh:
-  options:
-    ClientAliveInterval: 3000 # Time to live for the SSH connection
-
-
-##########
-# Smartd #
-##########
-smartd:
-  enabled: False
-
-
-############
-# Fail2ban #
-############
-failtoban:
-  ignore_ip: # Whitelist IPs
-    - 127.0.0.1
-
-
-############
-# Firewall #
-############
-firewall:
-  enabled: True
-
-
-
-#######
-# PHP #
-#######
-php:
-  options:
-    opcache.revalidate_freq: 5
-
-
-################
-# Applications #
-################
-applications:
-  download: False
-
-
-###########
-# Apache2 #
-###########
-apache:
-  options:
-    cache: no-cache # Cache options for static resources

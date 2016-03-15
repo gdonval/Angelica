@@ -1,36 +1,15 @@
 ---
-- name: Database server(s) configuration
-  hosts: db
+- name: Run backup server configuration playbook
+  hosts: backup
   remote_user: "{{ users.deployer.name }}"
   sudo: yes
   port: "{{ ssh.port }}"
   roles:
-    - db
+    - backup
   vars_prompt:
     - name: "letsgo"
-      prompt: "\n\e[1;35mYou’re about to deploy database configuration to dbms servers. Please make sure:\n
-      - You’ve run the playbooks \e[0;35minit.yml\e[1;35m and \e[0;35mservers-common.yml\e[1;35m.\n
-      - You’ve added your database dumps in \e[0;35mfiles/db/*.sql\e[1;35m.\n
-      - You’ve created and added the needed db scripts in \e[0;35mfiles/scripts/*.sh\e[1;35m.\n
-      Note: SSH server keys may have changed, so make sure your local \e[0;35m~/.ssh/known_hosts\e[1;35m is up to date.\n
-      If you’re ready, then let’s rock! \e[00m\n
-      (Press CTRL+C to cancel or Enter to continue)"
-    - name: "db_old_root_password"
-      prompt: "Enter the old password for database root user (the first time, leave this empty)"
-      private: yes
-      confirm: yes
-    - name: "db_root_password"
-      prompt: "Enter the new password for database root user"
-      private: yes
-      confirm: yes
-    - name: "db_user_password"
-      prompt: "Enter the new password for the database distant user (if he already have one, it will be overrided)"
-      private: yes
-      confirm: yes
-  tasks:
-    - name: Loaded configuration files by precedence
-      debug: var=precedence
-      tags: always
+      prompt: "\n\e[1;35mNot done"
+  vars_files:
     - vars/default/all
     - [ "vars/all", "vars/null" ]
     - [ "vars/default/type/{{ server_mail }}", "vars/null" ]

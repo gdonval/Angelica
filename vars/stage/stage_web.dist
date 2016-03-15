@@ -1,7 +1,7 @@
 ---
 
 # This is the web stage env specific configuration file
-# Feel free to change options
+# Feel free to change options after removing the .dist extension
 # It overrides vars/all, vars/db, vars/web, vars/backup, vars/smtp and vars/stage
 
 precedence:
