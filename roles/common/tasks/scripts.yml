@@ -57,4 +57,4 @@
   copy: src={{ item }} dest={{ script.path }} mode=0750 owner=root group={{ script.group }}
   with_fileglob:
     - "../../../files/scripts/{{ env }}/db/*.sh"
-  when: inventory_hostname in groups['db']/*.sh"
+  when: inventory_hostname in groups['db']/
