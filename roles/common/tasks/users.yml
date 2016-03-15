@@ -80,4 +80,3 @@
 - name: Users - Set skel for zsh configuration
   template: src=home/zshrc.j2 dest="/etc/skel/.zshrc" mode=644 owner=root group=root
   when: installed_zsh.stdout.find('install ok') != -1
-

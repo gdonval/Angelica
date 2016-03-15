@@ -280,8 +280,11 @@ applications:
       webdir: / # Application specific web directory
       gitrepo: git@github.com:gui-don/Angelica.git # Application git repository
       autosigned: True # Determine wether use an autosigned certificate or not
-      dbnames: # Create databases, let it empty if you don’t want any database
       composer: False # Determine whether it’s necessary to install composer or not
+      rewritetunnel: # Redirect any request to this file (this file must be in webdir)
+      rewritefreedirs: # All directories where it’s not necessary to apply rewrite (this dirs must be in webdir)
+        -
+      dbnames: # Create databases, let it empty if you don’t want any database
         - agl_db
       security: # CSR security
         allow:
