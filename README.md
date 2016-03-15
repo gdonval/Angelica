@@ -20,11 +20,11 @@ The vast majority of devops scripts are focused on specific applications. This p
 
 At least three environments are needed. It can be on a single machine or a infinite number of machines:
 
-- The host. This is likely to be your local machine. This is where you code and have an IDE installed.
-- The ansible machine. This must be an Unix/Linux machine. You’ll start ansible deployment here.
-- The application server(s). A single or a bunch of VMs or distant machines to host a web, dbms or smtp server.
+- **The host**. This is likely to be your local machine. This is where you code and have an IDE installed.
+- **The ansible machine**. This must be an Unix/Linux machine. You’ll start ansible deployment here.
+- **The application server(s)**. A single or a bunch of VMs or distant machines to host a web, dbms or smtp server.
 
-Ansible 1.9+ is needed. Ansible 2+ don’t work.
+Ansible 1.9+ is needed. Ansible 2+ won’t work for now.
 
 
 ### Prerequisite ###
@@ -37,13 +37,17 @@ Ansible 1.9+ is needed. Ansible 2+ don’t work.
 
 - Copy all the users SSH keys in `files/sshkeys`. Your (the deployer) key is a minimum. (ansible machine):
 
-- Install [Debian Jessie](https://www.debian.org/distrib/) on the application server(s). Choose a root password (strong please, at least 16 chars). **It must be the same for all servers**, you can change it afterwards. (the application servers).
+- Install [Debian Jessie](https://www.debian.org/distrib/) on the application server(s). Choose a root password (in prod, choose a strong one, at least 16 chars). **It must be the same for all servers**, you can change it afterwards. (the application servers).
 
 - Verify that `python`, `ssh` and `aptitude` are installed (the application servers):
 
         $ sudo aptitude install python ssh aptitude
 
-- Verify that [root](http://www.cyberciti.biz/faq/allow-root-account-to-use-ssh-openssh/) and password authentication are enabled - don’t worry, it will be disabled by ansible (the application servers).
+- SSH: verify that [root](http://www.cyberciti.biz/faq/allow-root-account-to-use-ssh-openssh/) and password autheuntication are enabled - don’t worry, it will be disabled by ansible (the application servers). You must set your `/etc/ssh/sshd_config` as follow (uncomment if needed and restart SSH):
+
+        # /etc/ssh/sshd_config
+        PermitRootLogin yes
+        PasswordAuthentication yes
 
 ### Deployment (ansible machine) ###
 
@@ -51,7 +55,7 @@ Ansible 1.9+ is needed. Ansible 2+ don’t work.
 
 - Write down your specific configuration. See [vars](vars) documentation.
 
-- Write down the application servers hosts in files located in `hosts`.
+- Write down the application servers hosts (IP or domain name) in files located in `hosts`.
 
 - Before the installation, connect once to the application servers with SSH, to initialize your `know_hosts` file.
 
@@ -60,11 +64,12 @@ Ansible 1.9+ is needed. Ansible 2+ don’t work.
         $ cd /path/ansible/
         $ ansible-playbook -i hosts/*env* init.yml [--ask-pass, --extra-vars "ssh_port=port"]
 
-- To deploy, run these commands with the needed *env* (local, stage or prod):
+- To deploy, run these commands with the needed *env* (*local*, *stage* or *prod*):
 
         $ ansible-playbook -i hosts/*env* play-common.yml
         $ ansible-playbook -i hosts/*env* play-web.yml
         $ ansible-playbook -i hosts/*env* play-db.yml
+        $ ansible-playbook -i hosts/*env* play-mail.yml
 
 That’s it. Your servers are ready.
 
@@ -105,7 +110,7 @@ Note: if you want to re-run only a part of a playbook, just add `--tags "your_ta
 
   Alternatively, use `/etc/fstab` and add this configuration:
 
-        *your_host_user*@*your_host_ip*:*your_host_project_directory* *your_vm_project_directory* fuse.sshfs x-systemd.device-timeout=10,x-systemd.automount,_netdev,user,IdentityFile=/home/*your_user*/.ssh/id_rsa,allow_other,default_permissions,uid=33,gid=33 0 0
+        *your_host_user*@*your_host_ip*:*your_host_project_directory* *your_vm_project_directory* fuse.sshfs x-systemd.device-timeout=10,x-systemd.automount,_netdev,user,IdentityFile=/home/*your_user*/.ssh/id_rsa,port=*your_host_ssh_port*,allow_other,default_permissions,uid=33,gid=33 0 0
 
   Be warned, a single error in the paths or names (case sensitive), and you’ll get an error message. So double check before crying.
 
@@ -113,7 +118,7 @@ Note: if you want to re-run only a part of a playbook, just add `--tags "your_ta
 
         # fusermount -u *your_vm_project_directory*
 
-- Make sure to add you host fingerprint into your virtual machine deployer `known_hosts` file. (Tips: use `mount -a` if you chose the `/etc/fstab` solution).
+- Make sure to add you host fingerprint into your virtual machine deployer (or root if you use the `/etc/fstab` solution) `known_hosts` file. (Tips: use `mount -a` if you chose the `/etc/fstab` solution).
 
 - Check that the shared directory on the virtual machine is empty.
 
