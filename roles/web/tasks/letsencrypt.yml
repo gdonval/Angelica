@@ -24,7 +24,7 @@
   service: name=apache2 state=stopped
 
 - name: Letsencrypt - Get certificate for adminer
-  command: letsencrypt certonly --standalone -d {{ adminer.url }} --expand --email {{ adminer.email }}
+  command: letsencrypt certonly --standalone -d {{ adminer.url }} --expand --email {{ adminer.email }} --agree-tos
   args:
     creates: "/etc/letsencrypt/live/{{ adminer.url }}"
   when: adminer.enabled
@@ -32,7 +32,7 @@
     - renew
 
 - name: Letsencrypt - Get certificate for applications
-  command: letsencrypt certonly --standalone -d {{ item.url }} -d {{ item.alias }} --expand --email {{ item.email }}
+  command: letsencrypt certonly --standalone -d {{ item.url }} -d {{ item.alias }} --expand --email {{ item.email }} --agree-tos
   args:
     creates: "/etc/letsencrypt/live/{{ item.url }}"
   with_items: applications.sites
