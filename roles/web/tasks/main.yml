@@ -7,14 +7,14 @@
 - include: csstools.yml tags=csstools
   when: csstools.enabled and ruby.enabled and npm.enabled
 
+- include: git.yml tags=git
+  when: git.enabled
+
 - include: ssl.yml tags=ssl
   when: ssl.enabled
 
 - include: apache.yml tags=apache
   when: apache.enabled
-
-- include: git.yml tags=git
-  when: git.enabled
 
 - include: adminer.yml tags=adminer
   when: adminer.enabled
