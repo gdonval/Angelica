@@ -28,21 +28,21 @@
     - applications.sites | default({})
     - "{{ [adminer] }}"
 
-- name: Check - If SSL is enabled, and autosigned disabled, the certs private keys are present
+- name: Check - If SSL is enabled, and autosigned disabled + letsencrypt disabled, the certs private keys are present
   fail: msg="A private key is lacking for site “{{ item.item.url }}”. Please add the private key “files/ssl/private/{{ item.item.short_name }}.key”. Or, you can disable SSL or enabled autosign certs for this site."
-  when: item.stat is defined and not item.stat.exists
+  when: not letsencrypt.enabled and item.stat is defined and not item.stat.exists
   with_items:
     - "{{ privates.results }}"
 
-- name: Check - If SSL is enabled, and autosigned disabled, the certs are present
+- name: Check - If SSL is enabled, and autosigned disabled + letsencrypt disabled, the certs are present
   fail: msg="A certificate is lacking for site “{{ item.item.url }}”. Please add the certificate “files/ssl/certs/{{ item.item.short_name }}.crt”. Or, you can disable SSL or enabled autosign certs for this site."
-  when: item.stat is defined and not item.stat.exists
+  when: not letsencrypt.enabled and item.stat is defined and not item.stat.exists
   with_items:
     - "{{ certs.results }}"
 
-- name: Check - If SSL is enabled, and autosigned disabled, the ca certs are present
+- name: Check - If SSL is enabled, and autosigned disabled + letsencrypt disabled, the ca certs are present
   fail: msg="A ca certificate is lacking for site “{{ item.item.url }}”. Please add the ca certificate “files/ssl/ca/{{ item.item.short_name }}.cabundle”. Or, you can disable SSL or enabled autosign certs for this site."
-  when: item.stat is defined and not item.stat.exists
+  when: not letsencrypt.enabled and item.stat is defined and not item.stat.exists
   with_items:
     - "{{ cas.results }}"
 
