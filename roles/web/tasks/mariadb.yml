@@ -1,6 +1,7 @@
 ---
-- name: MariaDB - Create configuration directory
+- name: MariaDB client - Create configuration directory
   file: state=directory path=/etc/mysql/
 
-- name: MariaDB - Install client configuration file
+- name: MariaDB client - Install client configuration file
   template: src=etc/mysql/my.cnf.j2 dest=/etc/mysql/my.cnf backup=yes owner=root group=root mode=0644
+  when: inventory_hostname not in groups['db']
