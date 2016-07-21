@@ -1,3 +1,7 @@
+#
+# GIT installation, configuration and handle github
+# @Tag git
+#
 ---
 - name: Git - Install git | update repositories
   apt: update_cache=yes upgrade=safe state=latest
@@ -5,20 +9,25 @@
 - name: Git - Install git
   apt: name=git state=present update_cache=yes force=yes
 
-- name: Git - Configure ssh for github
+- name: Git - Make git ignore permissions
+  command: git config --global core.filemode false
+
+# SSH
+
+- name: Git/SSH - Configure ssh for github
   lineinfile: dest=/etc/ssh/ssh_config regexp="{{ item.regexp }}" line="{{ item.line }}" backup=yes owner=root group=root mode=0644 insertbefore="BOF"
   with_items:
     - { regexp: '^\s*Port 443', line: '  Port 443' }
     - { regexp: '^\s*Hostname ssh.github.com', line: '  Hostname ssh.github.com'}
     - { regexp: '^\s*Host github.com', line: 'Host github.com'}
+  when: ssh.enabled
   notify:
     - restart ssh
 
-- name: Git - Make git ignore permissions
-  command: git config --global core.filemode false
-
-- name: Git - Ensure ssh.github.com is a known host
+- name: Git/SSH - Ensure ssh.github.com is a known host
   lineinfile: dest=/home/{{ users.deployer.name }}/.ssh/known_hosts create=yes state=present line="{{ lookup('pipe', 'ssh-keyscan -t rsa ssh.github.com') }}" regexp="^ssh.github\\.com"
+  when: ssh.enabled
 
-- name: Git - Ensure github.com is a known host
+- name: Git/SSH - Ensure github.com is a known host
   lineinfile: dest=/home/{{ users.deployer.name }}/.ssh/known_hosts create=yes state=present line="{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}" regexp="^github\\.com"
+  when: ssh.enabled

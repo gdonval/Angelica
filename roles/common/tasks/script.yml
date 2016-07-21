@@ -1,3 +1,8 @@
+#
+# SCRIPT basic configuration
+# Gzts everything in files/scripts/ and move it to the corresponding server
+# @Todo Every server-related scripts should be moved to corresponding role
+#
 ---
 - name: Script - Create group for script
   group: name={{ script.group }} state=present system=yes

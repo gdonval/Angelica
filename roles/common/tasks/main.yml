@@ -6,11 +6,11 @@
 - include: packages.yml tags=packages
   when: package.enabled
 
-- include: scripts.yml tags=scripts
+- include: script.yml tags=script
   when: script.enabled
 
-- include: sharedgroup.yml tags=sharedgroup
-  when: shared_group.enabled
+- include: group.yml tags=group
+  when: group.enabled
 
 - include: ssh.yml tags=ssh
   when: ssh.enabled
@@ -26,7 +26,7 @@
 - include: smartd.yml tags=smartd
   when: smartd.enabled
 
-- include: fail2ban.yml tags=fail2ban
+- include: failtoban.yml tags=failtoban
   when: failtoban.enabled
 
 - include: firewall.yml tags=firewall

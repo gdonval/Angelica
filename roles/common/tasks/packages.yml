@@ -1,3 +1,7 @@
+#
+# PACKAGES - Package manager configuration and package installation
+# @Tag packages
+#
 ---
 - name: Packages - Update & upgrade servers
   apt: update_cache=yes upgrade=safe state=latest

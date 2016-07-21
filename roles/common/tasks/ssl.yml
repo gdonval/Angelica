@@ -1,3 +1,10 @@
+#
+# SSL - Basic configuration & MariaDB exchange
+# @Tag ssl
+# @Depends mariadb
+# @Note It creates SQL certificates here, because they need to be aware of each other
+#       and then dispatches to the correct server (client=Web/server=Db).
+#
 ---
 - name: SSL - Install ssl | update repositories
   apt: update_cache=yes upgrade=safe state=latest

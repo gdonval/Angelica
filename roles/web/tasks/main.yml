@@ -4,9 +4,6 @@
 - include: php.yml tags=php
   when: php.enabled
 
-- include: csstools.yml tags=csstools
-  when: csstools.enabled and ruby.enabled and npm.enabled
-
 - include: git.yml tags=git
   when: git.enabled
 
@@ -17,16 +14,16 @@
   when: apache.enabled
 
 - include: adminer.yml tags=adminer
-  when: adminer.enabled
+  when: adminer.enabled and apache.enabled and mariadb.enabled and php.enabled
 
-- include: application.yml tags=applications
-  when: applications.enabled
+- include: applications.yml tags=applications
+  when: applications.enabled and apache.enabled and git.enabled
 
 - include: letsencrypt.yml tags=letsencrypt
-  when: letsencrypt.enabled and git.enabled and ssl.enabled
+  when: letsencrypt.enabled and apache.enabled and git.enabled and ssl.enabled and script.enabled
 
 - include: mariadb.yml tags=mariadb
   when: mariadb.enabled
 
-- include: scripts.yml tags=scripts
+- include: script.yml tags=script
   when: script.enabled

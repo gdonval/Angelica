@@ -1,3 +1,7 @@
+#
+# FAIL2BAN basic configuration
+# @Tag failtoban
+#
 ---
 - name: Fail2ban - Install fail2ban | update repositories
   apt: update_cache=yes upgrade=safe state=latest

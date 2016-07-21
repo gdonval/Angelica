@@ -4,7 +4,7 @@
 - include: mariadb.yml tags=mariadb
   when: mariadb.enabled
 
-- include: scripts.yml tags=scripts
+- include: script.yml tags=script
   when: script.enabled
 
 - include: backup.yml tags=backup

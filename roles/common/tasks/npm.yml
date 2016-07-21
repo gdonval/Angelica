@@ -1,3 +1,7 @@
+#
+# NPM (NodeJS) basic configuration
+# @Tag npm
+#
 ---
 - name: npm - Install npm | update repositories
   apt: update_cache=yes upgrade=safe state=latest

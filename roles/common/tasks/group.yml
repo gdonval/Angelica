@@ -1,0 +1,7 @@
+#
+# GROUP - Basic configuration
+# @Tag group
+#
+---
+- name: Shared group - Create shared group
+  group: name={{ group.shared }} state=present system=no

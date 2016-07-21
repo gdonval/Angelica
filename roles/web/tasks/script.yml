@@ -1,3 +1,7 @@
+#
+# SCRIPT - for web
+# @Tag script
+#
 ---
 - name: Script - Install constants file
   template: src=undefined/scripts/webConstants.sh.j2 dest="{{ script.path }}/{{ item.short_name }}Constants.sh" mode=0755 owner=root group={{ script.group }}

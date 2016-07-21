@@ -1,3 +1,9 @@
+#
+# BACKUP - Basic configuration
+# @Tag backup
+# @Depends ssh && script && users
+# @Todo SHOULD BE MOVED TO A BACKUP ROLE
+#
 ---
 - name: Backup - Install rsync | update & upgrade servers
   apt: update_cache=yes upgrade=safe state=latest

@@ -1,3 +1,7 @@
+#
+# SSL for applications, copy or generate certificates, permissions
+# @Tag ssl
+#
 ---
 - name: SSL - Install ssl | update repositories
   apt: update_cache=yes upgrade=safe state=latest

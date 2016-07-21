@@ -1,3 +1,6 @@
+#
+# PRELIMINARY CHECKS
+#
 ---
 # Users
 - name: Check - Every user have all variables
@@ -59,8 +62,8 @@
 # Shared group
 
 - name: Check - Shared group name is not one of the users names
-  fail: msg="Shared group name “{{ shared_group.name }}” can’t be the same as the user “{{ item.name }}”."
-  when: shared_group.enabled and (item.name is defined and item.name == shared_group.name)
+  fail: msg="Shared group name “{{ group.shared }}” can’t be the same as the user “{{ item.name }}”."
+  when: group.enabled and (item.name is defined and item.name == group.shared)
   with_flattened:
     - users.others | default({})
     - "{{ [users.deployer] }}"

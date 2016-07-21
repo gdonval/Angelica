@@ -1,5 +1,10 @@
+#
+# Letsencrypt installation, configuration and installation for applications
+# @Tag letsencrypt
+# @RunBefore applications && adminer
+# @Depends script && ssl && apache || nginx && git
+#
 ---
-
 - name: Letsencrypt - Create base directory
   file: state=directory dest={{ letsencrypt.path }} owner=root group=root mode=0777 recurse=yes
 
@@ -20,26 +25,6 @@
   file: src={{ letsencrypt.path }}/letsencrypt-auto dest=/usr/bin/letsencrypt state=link
   ignore_errors: yes
 
-- name: Letsencrypt - Stop any server
-  service: name=apache2 state=stopped
-
-- name: Letsencrypt - Get certificate for adminer
-  command: letsencrypt certonly --standalone -d {{ adminer.url }} --expand --email {{ adminer.email }} --agree-tos
-  args:
-    creates: "/etc/letsencrypt/live/{{ adminer.url }}"
-  when: adminer.enabled
-  tags:
-    - renew
-
-- name: Letsencrypt - Get certificate for applications
-  command: letsencrypt certonly --standalone -d {{ item.url }} -d {{ item.alias }} --expand --email {{ item.email }} --agree-tos
-  args:
-    creates: "/etc/letsencrypt/live/{{ item.url }}"
-  with_items: applications.sites
-  when: applications.enabled
-  tags:
-    - renew
-
 - name: Letsencrypt - Copy renewal script
   template: src=undefined/scripts/renewLetsencryptCertificates.sh.j2 dest="{{ script.path }}renewLetsencryptCertificates.sh" mode=0750 owner=root group={{ script.group }}
 
@@ -47,6 +32,3 @@
   cron: name="Renew Letsencrypt certificates" day="1" hour="4" minute="0" job="{{ script.path }}renewLetsencryptCertificates.sh" user=root
   notify:
     - restart cron
-
-- name: Letsencrypt - Start any server
-  service: name=apache2 state=restarted

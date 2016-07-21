@@ -1,3 +1,0 @@
----
-- name: Shared group - Create shared group
-  group: name={{ shared_group.name }} state=present system=no

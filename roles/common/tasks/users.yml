@@ -1,3 +1,7 @@
+#
+# USERS - Basic creation and configuration
+# @Tag users
+#
 ---
 - name: Users - Update & upgrade servers
   apt: update_cache=yes upgrade=safe state=latest

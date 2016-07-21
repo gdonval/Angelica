@@ -1,3 +1,7 @@
+#
+# MARIADB Server - Installation, permissions, password and configuration
+# @Tag mariadb
+#
 ---
 - name: MariaDB - Install MariaDb | upgrade servers
   apt: update_cache=yes upgrade=safe state=latest

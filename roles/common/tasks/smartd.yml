@@ -1,3 +1,7 @@
+#
+# SMARTD - Basic configuration
+# @smartd
+#
 ---
 - name: Smartd - Install smartmontools | update repositories
   apt: update_cache=yes upgrade=safe state=latest

@@ -1,0 +1,99 @@
+#
+# Web applications installation/download, permissions, composer installation
+# @Tag applications
+# @Depends apache || nginx && git
+#
+---
+- name: Application - Create base directory
+  file: state=directory dest={{ item.path }} owner=www-data group=www-data mode=0777 recurse=yes
+  with_items: applications.sites
+
+- name: Application - Create complete directory
+  file: state=directory dest={{ item.path }}{{ item.webdir }} owner=www-data group=www-data mode=0770 recurse=yes
+  with_items: applications.sites
+  when: not applications.download
+
+- name: Application - Get from GIT
+  git: clone=yes dest={{ item.path }} repo={{ item.gitrepo }} force=yes update=yes
+  with_items: applications.sites
+  sudo_user: "{{ users.deployer.name }}"
+  when: applications.download
+
+- name: Application - Disable git filemode (handle permissions changes)
+  lineinfile: dest="{{ item.path }}/.git/config" regexp="^\s*filemode\s*=\s*" line="  filemode = false"
+  with_items: applications.sites
+  when: applications.download
+
+- name: Application - Change owner and group
+  file: state=directory dest={{ item.path }} recurse=yes owner=www-data group=www-data
+  with_items: applications.sites
+
+- name: Application - Permissions for directories
+  command: find {{ item.path }} -type d -exec chmod 0770 {} \;
+  with_items: applications.sites
+
+- name: Application - Permissions for files
+  command: find {{ item.path }} -type f -exec chmod 0760 {} \;
+  with_items: applications.sites
+
+- name: Application - Set main domain name in hosts
+  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Project\s*{{ item.0 }}\s*$" line="127.0.0.1    {{ item.1.url }} {{ '#' }} Project {{ item.0 }}"
+  with_indexed_items: applications.sites
+
+# Apache
+
+- name: Application/Apache - Add default vhost for Apache2
+  template: src=etc/apache2/sites-available/default.j2 dest=/etc/apache2/sites-available/000-default.conf mode=0644 owner=root group=root
+  with_items: applications.sites
+  when: apache.enabled
+
+- name: Application/Apache - Add application vhosts for Apache2
+  template: src=etc/apache2/sites-available/project.j2 dest=/etc/apache2/sites-available/010-{{ item.url }}.conf mode=0644 owner=root group=root
+  with_items: applications.sites
+  when: apache.enabled
+
+- name: Application/Apache - Activate main vhosts for Apache2
+  command: a2ensite 010-{{ item.url }} creates=/etc/apache2/sites-enabled/010-{{ item.url }}.conf
+  with_items: applications.sites
+  when: apache.enabled
+  notify:
+    - restart apache2
+
+# Composer
+
+- name: Application/Composer - Download composer installer
+  get_url: url=https://getcomposer.org/installer dest={{ item.path }}/composer-setup.php
+  with_items: applications.sites
+  when: item.composer
+
+- name: Application/Composer - Install composer
+  command: php {{ item.path }}/composer-setup.php --install-dir {{ item.path }}
+  args:
+    creates: "{{ item.path }}/composer.phar"
+  sudo_user: www-data
+  with_items: applications.sites
+  when: item.composer
+
+- name: Application/Composer - Remove installer composer
+  file: path={{ item.path }}/composer-setup.php state=absent
+  with_items: applications.sites
+  when: item.composer
+
+# Letsencrypt
+
+- name: Application/Letsencrypt - Stop any server
+  service: name=apache2 state=stopped
+  when: apache.enabled
+
+- name: Application/Letsencrypt - Get letsencrypt certificates for applications
+  command: letsencrypt certonly --standalone -d {{ item.url }} -d {{ item.alias }} --expand --email {{ item.email }} --agree-tos
+  args:
+    creates: "/etc/letsencrypt/live/{{ item.url }}"
+  with_items: applications.sites
+  when: letsencrypt.enabled
+  tags:
+    - renew
+
+- name: Application/Letsencrypt - Start any server
+  service: name=apache2 state=restarted
+  when: apache.enabled

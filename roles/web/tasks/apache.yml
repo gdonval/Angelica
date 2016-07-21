@@ -1,3 +1,8 @@
+#
+# Apache2 installation, configuration, vhost
+# @Tag apache
+# @RunBefore applications && adminer
+#
 ---
 - name: Apache2 - Install apache2 | update repositories
   apt: update_cache=yes upgrade=safe state=latest
@@ -11,20 +16,6 @@
 - name: Apache2 - Remove all available sites
   command: find /etc/apache2/sites-available/ -type l -exec rm -f "{}" \;
 
-- name: Apache2 - Add default vhost
-  template: src=etc/apache2/sites-available/default.j2 dest=/etc/apache2/sites-available/000-default.conf mode=0644 owner=root group=root
-  with_items: applications.sites
-
-- name: Apache2 - Add application vhosts
-  template: src=etc/apache2/sites-available/project.j2 dest=/etc/apache2/sites-available/010-{{ item.url }}.conf mode=0644 owner=root group=root
-  with_items: applications.sites
-
-- name: Apache2 - Activate main vhosts
-  command: a2ensite 010-{{ item.url }} creates=/etc/apache2/sites-enabled/010-{{ item.url }}.conf
-  with_items: applications.sites
-  notify:
-    - restart apache2
-
 - name: Apache2 - Activate default vhost
   command: a2ensite 000-default
   notify:
@@ -36,24 +27,20 @@
   notify:
     - restart apache2
 
-- name: Apache2 - Install new apache configuration file
+- name: Apache2 - Install Apache configuration file - general
   template: src=etc/apache2/apache2.conf.j2 dest=/etc/apache2/apache2.conf mode=0644 owner=root group=root backup=yes
   notify:
     - restart apache2
 
-- name: Apache2 - Install new apache ports configuration file
+- name: Apache2 - Install Apache configuration file - ports
   template: src=etc/apache2/ports.conf.j2 dest=/etc/apache2/ports.conf mode=0644 owner=root group=root backup=yes
   notify:
     - restart apache2
 
-- name: Apache2 - Install apache compression configuration
+- name: Apache2 - Install Apache configuration file - compression
   template: src=etc/apache2/mods-available/deflate.conf.j2 dest=/etc/apache2/mods-available/deflate.conf mode=0644 owner=root group=root backup=yes
   notify:
     - restart apache2
-
-- name: Apache2 - Set main domain name in hosts
-  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Project\s*{{ item.0 }}\s*$" line="127.0.0.1    {{ item.1.url }} {{ '#' }} Project {{ item.0 }}"
-  with_indexed_items: applications.sites
 
 - name: Apache2 - Set permissions on web folder
   file: path=/var/www/ owner=www-data group=www-data mode=2750 recurse=yes

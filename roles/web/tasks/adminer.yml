@@ -1,3 +1,9 @@
+#
+# Adminer installation, apache configuration, PHP configuration
+# @Tag adminer
+# @Depends apache || nginx && php && mariadb
+# @Todo Needs to be hooked somehow with PHP and apache to not break this if other are run alone.
+#
 ---
 - name: Adminer - Create adminer path
   file: state=directory path={{ adminer.path }} owner=www-data group=www-data mode=0750
@@ -8,26 +14,49 @@
 - name: Adminer - Download adminer style
   get_url: url=https://raw.githubusercontent.com/vrana/adminer/master/designs/brade/adminer.css dest={{ adminer.path }}adminer.css mode=0644 force=yes timeout=15
 
-- name: Adminer - Add to apache
+- name: Adminer - Set adminer domain name in hosts
+  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Adminer\s*$" line="127.0.0.1    {{ mariadb.domain }} {{ '#' }} Adminer"
+
+# Apache
+
+- name: Adminer/Apache - Make adminer accessible
   template: src=etc/apache2/sites-available/adminer.j2 dest=/etc/apache2/sites-available/020-{{ mariadb.domain }}.conf mode=0644 owner=root group=root
   notify:
     - restart apache2
   when: apache.enabled
 
-- name: Adminer - Activate adminer webapp
+- name: Adminer/Apache - Activate adminer webapp
   command: a2ensite 020-{{ mariadb.domain }} creates=/etc/apache2/sites-enabled/020-{{ mariadb.domain }}.conf
   notify:
     - restart apache2
   when: apache.enabled
 
-- name: Adminer - Set adminer domain name in hosts
-  lineinfile: dest=/etc/hosts state=present regexp=".*#\s*Adminer\s*$" line="127.0.0.1    {{ mariadb.domain }} {{ '#' }} Adminer"
 
-- name: Adminer - Authorize adminer in PHP openbasedir
+# PHP
+
+- name: Adminer/PHP - Authorize adminer in PHP openbasedir
   lineinfile: dest={{ item }} state=present regexp='^(\s*;?\s*open_basedir\s*=\s*\")((?![^\"]*{{ adminer.path }}[^\"]*)[^\"]*)(\")$' line='\1\2:{{ adminer.path }}\3' backrefs=yes
   with_items:
     - /etc/php/7.0/cli/php.ini
     - /etc/php/7.0/apache2/php.ini
   notify:
     - restart apache2
+  when: php.enabled
+
+# Letsencrypt
+
+- name: Adminer/Letsencrypt - Stop any server
+  service: name=apache2 state=stopped
+  when: apache.enabled
+
+- name: Adminer/Letsencrypt - Get letsencrypt certificates for adminer
+  command: letsencrypt certonly --standalone -d {{ adminer.url }} --expand --email {{ adminer.email }} --agree-tos
+  args:
+    creates: "/etc/letsencrypt/live/{{ adminer.url }}"
+  when: letsencrypt.enabled
+  tags:
+    - renew
+
+- name: Adminer/Letsencrypt - Start any server
+  service: name=apache2 state=restarted
   when: apache.enabled

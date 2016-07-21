@@ -1,6 +1,12 @@
+#
+# MariaDB client configuration
+# @Tag mariadb
+# @Note Only needed when MariaDB client and server are on different machines
+#
 ---
 - name: MariaDB client - Create configuration directory
   file: state=directory path=/etc/mysql/
+  when: inventory_hostname not in groups['db']
 
 - name: MariaDB client - Install client configuration file
   template: src=etc/mysql/my.cnf.j2 dest=/etc/mysql/my.cnf backup=yes owner=root group=root mode=0644

@@ -1,3 +1,7 @@
+#
+# RUBY basic configuration
+# @Tag ruby
+#
 ---
 - name: Ruby - Install ruby | update repositories
   apt: update_cache=yes upgrade=safe state=latest
