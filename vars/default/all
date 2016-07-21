@@ -22,9 +22,11 @@ package:
     - vim
 
 
-#######
-# NTP #
-#######
+########
+# Time #
+########
+time:
+  timezone: UTC
 
 
 #######
@@ -229,7 +231,7 @@ php:
     file_uploads: 'On' # Allow uploads by users
     upload_tmp_dir: \"/var/lib/php5/tmp/\" # Temporary directory for uploads
     upload_max_filesize: 2M # Maximum filesize for an upload by a user
-    date.timezone: "Europe/Paris" # Timezone of the server
+    date.timezone: "UTC" # Timezone of the server
     pdo_mysql.cache_size: 2000 # Cache size for pdo_mysql
     session.save_path: \"/var/lib/php5/sessions/\" # Session save path
     session.name: angSess # Session name
@@ -391,6 +393,7 @@ mariadb:
     innodb_buffer_pool_instances: 2 # default: 1 - Advice: Share RAM in multiple instances
     collation_server: utf8_general_ci
     character_set_server: utf8
+    default_time_zone: '+00:00'
 
 
 ###########

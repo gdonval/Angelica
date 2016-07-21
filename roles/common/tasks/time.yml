@@ -1,0 +1,21 @@
+#
+# Time basic configuration
+#
+---
+- name: Time - Update server
+  apt: update_cache=yes upgrade=safe state=latest
+
+- name: Time - Stat timezone file
+  stat: path=/usr/share/zoneinfo/{{ time.timezone }}
+  register: timezone_file
+
+- name: Time - Set system timezone
+  template: src=etc/timezone.j2 dest=/etc/timezone
+  when: timezone_file.stat.exists
+
+- name: Time - Set system localtime file (timezone)
+  command: cp -f /usr/share/zoneinfo/{{ time.timezone }} /etc/localtime
+  when: timezone_file.stat.exists
+
+- name: Time - Install NTP
+  apt: name=ntp state=present

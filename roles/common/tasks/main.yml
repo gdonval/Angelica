@@ -1,8 +1,7 @@
 ---
-# Check config file and dependencies
 - include: check.yml tags=always
 
-- include: ntp.yml tags=ntp
+- include: time.yml tags=time
 
 - include: packages.yml tags=packages
   when: package.enabled

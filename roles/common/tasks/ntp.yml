@@ -1,6 +1,0 @@
----
-- name: NTP - Update server
-  apt: update_cache=yes upgrade=safe state=latest
-
-- name: NTP - Install NTP
-  apt: name=ntp state=present
