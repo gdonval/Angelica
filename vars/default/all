@@ -224,11 +224,14 @@ php:
     pdo_mysql.cache_size: 2000 # Cache size for pdo_mysql
     session.save_path: \"/var/lib/php5/sessions/\" # Session save path
     session.name: angSess # Session name
+    session.use_strict_mode: 1 # Strict mode protects applications from session fixation via session adoption vulnerability
     session.cookie_httponly: 1 # Whether or not to add the httpOnly flag to the cookie
     session.gc_probability: 0 # Defines the probability that the 'garbage collection' process is started on every session initialization.
     session.gc_maxlifetime: 172800 # Session maximum lifetime
     session.cookie_domain: \".project.com\" # Cookie domain
     session.cookie_lifetime: 172800 # Cookie lifetime
+    session.cookie_secure: 1 # Set secure session bit (to cipher cookies when using TLS)
+    session.hash_bits_per_character: 6 # ; Possible values: 4 bits: 0-9, a-f | 5 bits: 0-9, a-v | 6 bits: 0-9, a-z, A-Z, "-", ","
     session.hash_function: 1 # Define session hash function (0 = md5 / 1 = sha1)
     opcache.enable: 1 # Determine whether or not enable opcache
     opcache.memory_consumption: 192 # Opcache memory consumption
